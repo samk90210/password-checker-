@@ -1,26 +1,50 @@
 body {
   font-family: Arial, sans-serif;
+  background-color: #f7f7f7;
   display: flex;
-  height: 100vh;
   justify-content: center;
   align-items: center;
-  background: #f0f0f0;
+  height: 100vh;
+  margin: 0;
 }
 
 .container {
-  text-align: center;
   background: white;
   padding: 2rem;
   border-radius: 10px;
-  box-shadow: 0 0 15px rgba(0,0,0,0.1);
+  width: 400px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
-#password {
-  padding: 0.5rem;
-  width: 80%;
-  margin-bottom: 1rem;
+input[type="password"] {
+  padding: 10px;
+  width: 100%;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-size: 1rem;
 }
 
 #strength-text {
   font-weight: bold;
+  margin: 10px 0;
+}
+
+ul {
+  padding-left: 20px;
+}
+
+li {
+  margin-bottom: 6px;
+}
+
+.bad {
+  color: red;
+}
+
+.medium {
+  color: orange;
+}
+
+.strong {
+  color: green;
 }
