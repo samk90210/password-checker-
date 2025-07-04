@@ -9,8 +9,18 @@
 <body>
   <div class="container">
     <h1>Password Strength Checker</h1>
+    <p><strong>Requirements:</strong></p>
+    <ul>
+      <li><span class="bad">Weak:</span> Fewer than 3 of the rules met</li>
+      <li><span class="medium">Intermediate:</span> 3–4 rules met</li>
+      <li><span class="strong">Strong:</span> All 5 rules met</li>
+    </ul>
+
     <input type="password" id="password" placeholder="Enter your password" />
     <div id="strength-text"></div>
+
+    <h3>Checklist:</h3>
+    <ul id="requirements"></ul>
   </div>
   <script src="script.js"></script>
 </body>
