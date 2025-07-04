@@ -1,6 +1,9 @@
 const passwordInput = document.getElementById("password");
 const strengthText = document.getElementById("strength-text");
 const requirementsList = document.getElementById("requirements");
+const togglePassword = document.getElementById("toggle-password");
+const copyBtn = document.getElementById("copy-btn");
+const progressFill = document.getElementById("progress-fill");
 
 passwordInput.addEventListener("input", function () {
   const password = passwordInput.value;
@@ -8,6 +11,7 @@ passwordInput.addEventListener("input", function () {
   strengthText.textContent = `Strength: ${result.strength}`;
   strengthText.style.color = result.color;
   updateRequirements(result.requirements);
+  updateProgressBar(result.score, result.color);
 });
 
 function evaluatePassword(password) {
@@ -24,8 +28,7 @@ function evaluatePassword(password) {
   if (hasNumber) score++;
   if (hasSpecial) score++;
 
-  let strength;
-  let color;
+  let strength, color;
   if (score === 5) {
     strength = "Strong ✅";
     color = "green";
@@ -40,22 +43,36 @@ function evaluatePassword(password) {
   return {
     strength,
     color,
-    requirements: {
-      lengthOK,
-      hasUpper,
-      hasLower,
-      hasNumber,
-      hasSpecial
-    }
+    score,
+    requirements: { lengthOK, hasUpper, hasLower, hasNumber, hasSpecial }
   };
 }
 
 function updateRequirements(reqs) {
   requirementsList.innerHTML = `
     <li style="color: ${reqs.lengthOK ? "green" : "red"}">✔️ At least 8 characters</li>
-    <li style="color: ${reqs.hasUpper ? "green" : "red"}">✔️ Contains an uppercase letter</li>
-    <li style="color: ${reqs.hasLower ? "green" : "red"}">✔️ Contains a lowercase letter</li>
-    <li style="color: ${reqs.hasNumber ? "green" : "red"}">✔️ Contains a number</li>
-    <li style="color: ${reqs.hasSpecial ? "green" : "red"}">✔️ Contains a special character (!@#$ etc.)</li>
+    <li style="color: ${reqs.hasUpper ? "green" : "red"}">✔️ Uppercase letter</li>
+    <li style="color: ${reqs.hasLower ? "green" : "red"}">✔️ Lowercase letter</li>
+    <li style="color: ${reqs.hasNumber ? "green" : "red"}">✔️ Number</li>
+    <li style="color: ${reqs.hasSpecial ? "green" : "red"}">✔️ Special character</li>
   `;
 }
+
+function updateProgressBar(score, color) {
+  const percent = (score / 5) * 100;
+  progressFill.style.width = `${percent}%`;
+  progressFill.style.backgroundColor = color;
+}
+
+togglePassword.addEventListener("change", function () {
+  passwordInput.type = this.checked ? "text" : "password";
+});
+
+copyBtn.addEventListener("click", function () {
+  navigator.clipboard.writeText(passwordInput.value).then(() => {
+    copyBtn.textContent = "✅ Copied!";
+    setTimeout(() => {
+      copyBtn.textContent = "📋 Copy";
+    }, 1500);
+  });
+});
