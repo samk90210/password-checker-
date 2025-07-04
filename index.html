@@ -9,6 +9,7 @@
 <body>
   <div class="container">
     <h1>Password Strength Checker</h1>
+
     <p><strong>Requirements:</strong></p>
     <ul>
       <li><span class="bad">Weak:</span> Fewer than 3 of the rules met</li>
@@ -17,11 +18,21 @@
     </ul>
 
     <input type="password" id="password" placeholder="Enter your password" />
+    <div class="controls">
+      <label><input type="checkbox" id="toggle-password" /> Show password</label>
+      <button id="copy-btn">📋 Copy</button>
+    </div>
+
     <div id="strength-text"></div>
+
+    <div class="progress-bar">
+      <div id="progress-fill"></div>
+    </div>
 
     <h3>Checklist:</h3>
     <ul id="requirements"></ul>
   </div>
+
   <script src="script.js"></script>
 </body>
 </html>
