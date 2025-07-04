@@ -1,11 +1,13 @@
 const passwordInput = document.getElementById("password");
 const strengthText = document.getElementById("strength-text");
+const requirementsList = document.getElementById("requirements");
 
 passwordInput.addEventListener("input", function () {
   const password = passwordInput.value;
-  const feedback = evaluatePassword(password);
-  strengthText.textContent = feedback.text;
-  strengthText.style.color = feedback.color;
+  const result = evaluatePassword(password);
+  strengthText.textContent = `Strength: ${result.strength}`;
+  strengthText.style.color = result.color;
+  updateRequirements(result.requirements);
 });
 
 function evaluatePassword(password) {
@@ -13,7 +15,7 @@ function evaluatePassword(password) {
   const hasUpper = /[A-Z]/.test(password);
   const hasLower = /[a-z]/.test(password);
   const hasNumber = /[0-9]/.test(password);
-  const hasSpecial = /[\W_]/.test(password); // includes symbols like !@#$%^&*()
+  const hasSpecial = /[\W_]/.test(password);
 
   let score = 0;
   if (lengthOK) score++;
@@ -22,20 +24,38 @@ function evaluatePassword(password) {
   if (hasNumber) score++;
   if (hasSpecial) score++;
 
+  let strength;
+  let color;
   if (score === 5) {
-    return {
-      text: "🟢 Strong Password ✅ (meets all requirements)",
-      color: "green",
-    };
+    strength = "Strong ✅";
+    color = "green";
   } else if (score >= 3) {
-    return {
-      text: "🟠 Medium Password ⚠️ (missing some security elements)",
-      color: "orange",
-    };
+    strength = "Intermediate ⚠️";
+    color = "orange";
   } else {
-    return {
-      text: "🔴 Weak Password ❌ (easy to crack)",
-      color: "red",
-    };
+    strength = "Weak ❌";
+    color = "red";
   }
+
+  return {
+    strength,
+    color,
+    requirements: {
+      lengthOK,
+      hasUpper,
+      hasLower,
+      hasNumber,
+      hasSpecial
+    }
+  };
+}
+
+function updateRequirements(reqs) {
+  requirementsList.innerHTML = `
+    <li style="color: ${reqs.lengthOK ? "green" : "red"}">✔️ At least 8 characters</li>
+    <li style="color: ${reqs.hasUpper ? "green" : "red"}">✔️ Contains an uppercase letter</li>
+    <li style="color: ${reqs.hasLower ? "green" : "red"}">✔️ Contains a lowercase letter</li>
+    <li style="color: ${reqs.hasNumber ? "green" : "red"}">✔️ Contains a number</li>
+    <li style="color: ${reqs.hasSpecial ? "green" : "red"}">✔️ Contains a special character (!@#$ etc.)</li>
+  `;
 }
