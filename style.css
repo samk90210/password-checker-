@@ -1,53 +1,43 @@
+/* Reset default browser styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 body {
   font-family: Arial, sans-serif;
   background-color: #f7f7f7;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  margin: 0;
+  min-height: 100vh;
+  padding: 20px;
 }
 
 .container {
   background: white;
   padding: 2rem;
-  border-radius: 10px;
-  width: 420px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-}
-
-input[type="password"] {
-  padding: 10px;
+  border-radius: 12px;
   width: 100%;
-  margin-top: 10px;
-  margin-bottom: 10px;
-  font-size: 1rem;
+  max-width: 420px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.controls {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-#copy-btn {
-  padding: 5px 10px;
-  font-size: 0.9rem;
-  cursor: pointer;
-}
-
-#strength-text {
-  font-weight: bold;
-  margin: 10px 0;
+h1 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  text-align: center;
 }
 
 ul {
-  padding-left: 20px;
+  padding-left: 1.2rem;
+  margin-bottom: 1rem;
 }
 
 li {
   margin-bottom: 6px;
+  font-size: 0.95rem;
 }
 
 .bad {
@@ -62,18 +52,86 @@ li {
   color: green;
 }
 
+input[type="password"],
+input[type="text"] {
+  padding: 10px;
+  width: 100%;
+  font-size: 1rem;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-family: monospace;
+  letter-spacing: 1px;
+  transition: border 0.2s ease;
+}
+
+input[type="password"]:focus,
+input[type="text"]:focus {
+  border-color: #888;
+  outline: none;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+label {
+  font-size: 0.9rem;
+}
+
+#copy-btn {
+  background-color: #eeeeee;
+  border: none;
+  padding: 6px 12px;
+  font-size: 0.9rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+#copy-btn:hover {
+  background-color: #dddddd;
+}
+
+#strength-text {
+  font-weight: bold;
+  font-size: 1rem;
+  margin: 10px 0;
+}
+
 .progress-bar {
   width: 100%;
   background-color: #e0e0e0;
   height: 10px;
   border-radius: 5px;
   overflow: hidden;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
 }
 
 #progress-fill {
   height: 100%;
   width: 0%;
   background-color: red;
-  transition: width 0.3s ease;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+#requirements {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+#requirements li {
+  padding-left: 20px;
+  position: relative;
+}
+
+#requirements li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: inherit;
 }
