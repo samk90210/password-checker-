@@ -15,7 +15,8 @@ passwordInput.addEventListener("input", function () {
 });
 
 function evaluatePassword(password) {
-  const lengthOK = password.length >= 8;
+  const lengthOK = password.length >= 12; // New requirement
+  const lengthStrong = password.length >= 14; // New "strong" threshold
   const hasUpper = /[A-Z]/.test(password);
   const hasLower = /[a-z]/.test(password);
   const hasNumber = /[0-9]/.test(password);
@@ -29,32 +30,47 @@ function evaluatePassword(password) {
   if (hasSpecial) score++;
 
   let strength, color;
-  if (score === 5) {
+
+  if (!lengthOK) {
+    strength = "Requirements not met ❌";
+    color = "red";
+    score = 0; // No progress if length too short
+  } else if (lengthStrong && score === 5) {
     strength = "Strong ✅";
     color = "green";
-  } else if (score >= 3) {
+  } else {
     strength = "Intermediate ⚠️";
     color = "orange";
-  } else {
-    strength = "Weak ❌";
-    color = "red";
   }
 
   return {
     strength,
     color,
     score,
-    requirements: { lengthOK, hasUpper, hasLower, hasNumber, hasSpecial }
+    requirements: { lengthOK, hasUpper, hasLower, hasNumber, hasSpecial, lengthStrong }
   };
 }
 
 function updateRequirements(reqs) {
   requirementsList.innerHTML = `
-    <li style="color: ${reqs.lengthOK ? "green" : "red"}">✔️ At least 8 characters</li>
-    <li style="color: ${reqs.hasUpper ? "green" : "red"}">✔️ Uppercase letter</li>
-    <li style="color: ${reqs.hasLower ? "green" : "red"}">✔️ Lowercase letter</li>
-    <li style="color: ${reqs.hasNumber ? "green" : "red"}">✔️ Number</li>
-    <li style="color: ${reqs.hasSpecial ? "green" : "red"}">✔️ Special character</li>
+    <li style="color: ${reqs.lengthOK ? "green" : "red"}">
+      ✔️ At least 12 characters
+    </li>
+    <li style="color: ${reqs.hasUpper ? "green" : "red"}">
+      ✔️ Uppercase letter
+    </li>
+    <li style="color: ${reqs.hasLower ? "green" : "red"}">
+      ✔️ Lowercase letter
+    </li>
+    <li style="color: ${reqs.hasNumber ? "green" : "red"}">
+      ✔️ Number
+    </li>
+    <li style="color: ${reqs.hasSpecial ? "green" : "red"}">
+      ✔️ Special character
+    </li>
+    <li style="color: ${reqs.lengthStrong ? "green" : "orange"}">
+      ⭐ 14+ characters for maximum strength
+    </li>
   `;
 }
 
