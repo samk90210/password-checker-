@@ -135,3 +135,16 @@ label {
   left: 0;
   color: inherit;
 }
+
+/* New: Specific styles for the length requirement */
+#length-requirement.bad {
+  color: red;
+}
+
+#length-requirement.medium {
+  color: orange;
+}
+
+#length-requirement.strong {
+  color: green;
+}
