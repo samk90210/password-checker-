@@ -148,3 +148,42 @@ label {
 #length-requirement.strong {
   color: green;
 }
+/* Sliders */
+input[type="range"] {
+  width: 100%;
+  margin: 5px 0 15px;
+}
+
+/* Game Mode */
+#game-area {
+  background: #f0f8ff;
+  padding: 1rem;
+  border-radius: 10px;
+  margin-top: 15px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+#game-question {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+#game-answer {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+}
+
+#submit-answer-btn {
+  background-color: #4caf50;
+  border: none;
+  padding: 8px 12px;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+#submit-answer-btn:hover {
+  background-color: #45a049;
+}
+
+
