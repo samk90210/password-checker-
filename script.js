@@ -1,3 +1,6 @@
+// ---------------------------
+// Password Checker
+// ---------------------------
 const passwordInput = document.getElementById("password");
 const strengthText = document.getElementById("strength-text");
 const requirementsList = document.getElementById("requirements");
@@ -15,8 +18,8 @@ passwordInput.addEventListener("input", function () {
 });
 
 function evaluatePassword(password) {
-  const lengthOK = password.length >= 12; // New requirement
-  const lengthStrong = password.length >= 14; // New "strong" threshold
+  const lengthOK = password.length >= 12;
+  const lengthStrong = password.length >= 14;
   const hasUpper = /[A-Z]/.test(password);
   const hasLower = /[a-z]/.test(password);
   const hasNumber = /[0-9]/.test(password);
@@ -30,11 +33,10 @@ function evaluatePassword(password) {
   if (hasSpecial) score++;
 
   let strength, color;
-
   if (!lengthOK) {
     strength = "Requirements not met ❌";
     color = "red";
-    score = 0; // No progress if length too short
+    score = 0;
   } else if (lengthStrong && score === 5) {
     strength = "Strong ✅";
     color = "green";
@@ -43,34 +45,17 @@ function evaluatePassword(password) {
     color = "orange";
   }
 
-  return {
-    strength,
-    color,
-    score,
-    requirements: { lengthOK, hasUpper, hasLower, hasNumber, hasSpecial, lengthStrong }
-  };
+  return { strength, color, score, requirements: { lengthOK, hasUpper, hasLower, hasNumber, hasSpecial, lengthStrong } };
 }
 
 function updateRequirements(reqs) {
   requirementsList.innerHTML = `
-    <li style="color: ${reqs.lengthOK ? "green" : "red"}">
-      ✔️ At least 12 characters
-    </li>
-    <li style="color: ${reqs.hasUpper ? "green" : "red"}">
-      ✔️ Uppercase letter
-    </li>
-    <li style="color: ${reqs.hasLower ? "green" : "red"}">
-      ✔️ Lowercase letter
-    </li>
-    <li style="color: ${reqs.hasNumber ? "green" : "red"}">
-      ✔️ Number
-    </li>
-    <li style="color: ${reqs.hasSpecial ? "green" : "red"}">
-      ✔️ Special character
-    </li>
-    <li style="color: ${reqs.lengthStrong ? "green" : "orange"}">
-      ⭐ 14+ characters for maximum strength
-    </li>
+    <li style="color: ${reqs.lengthOK ? "green" : "red"}">✔️ At least 12 characters</li>
+    <li style="color: ${reqs.hasUpper ? "green" : "red"}">✔️ Uppercase letter</li>
+    <li style="color: ${reqs.hasLower ? "green" : "red"}">✔️ Lowercase letter</li>
+    <li style="color: ${reqs.hasNumber ? "green" : "red"}">✔️ Number</li>
+    <li style="color: ${reqs.hasSpecial ? "green" : "red"}">✔️ Special character</li>
+    <li style="color: ${reqs.lengthStrong ? "green" : "orange"}">⭐ 14+ characters for max strength</li>
   `;
 }
 
@@ -87,18 +72,17 @@ togglePassword.addEventListener("change", function () {
 copyBtn.addEventListener("click", function () {
   navigator.clipboard.writeText(passwordInput.value).then(() => {
     copyBtn.textContent = "✅ Copied!";
-    setTimeout(() => {
-      copyBtn.textContent = "📋 Copy";
-    }, 1500);
+    setTimeout(() => copyBtn.textContent = "📋 Copy", 1500);
   });
 });
 
-// Existing password checker code remains the same...
-// Additions below ⬇️
+// ---------------------------
+// Password Generator Modal
+// ---------------------------
+const openGeneratorBtn = document.getElementById("open-generator-btn");
+const generatorModal = document.getElementById("generator-modal");
+const closeModal = document.querySelector(".close");
 
-// ---------------------------
-// 🔹 Password Generator
-// ---------------------------
 const generateBtn = document.getElementById("generate-btn");
 const lengthSlider = document.getElementById("length-slider");
 const numberSlider = document.getElementById("number-slider");
@@ -107,6 +91,16 @@ const specialSlider = document.getElementById("special-slider");
 const lengthValue = document.getElementById("length-value");
 const numberValue = document.getElementById("number-value");
 const specialValue = document.getElementById("special-value");
+
+openGeneratorBtn.addEventListener("click", () => {
+  generatorModal.style.display = "block";
+});
+closeModal.addEventListener("click", () => {
+  generatorModal.style.display = "none";
+});
+window.addEventListener("click", (e) => {
+  if (e.target === generatorModal) generatorModal.style.display = "none";
+});
 
 [lengthSlider, numberSlider, specialSlider].forEach(slider => {
   slider.addEventListener("input", () => {
@@ -122,36 +116,24 @@ generateBtn.addEventListener("click", () => {
   const specials = parseInt(specialSlider.value);
 
   passwordInput.value = generatePassword(length, numbers, specials);
-  passwordInput.dispatchEvent(new Event("input")); // Re-run checker
+  passwordInput.dispatchEvent(new Event("input"));
+  generatorModal.style.display = "none";
 });
 
 function generatePassword(length, numbers, specials) {
   const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
   const digits = "0123456789";
   const specialChars = "!@#$%^&*()_+[]{}<>?/|";
+  let pool = letters, result = "";
 
-  let pool = letters;
-  let result = "";
-
-  // Guarantee numbers & specials
-  for (let i = 0; i < numbers; i++) {
-    result += digits.charAt(Math.floor(Math.random() * digits.length));
-  }
-  for (let i = 0; i < specials; i++) {
-    result += specialChars.charAt(Math.floor(Math.random() * specialChars.length));
-  }
-
-  // Fill remaining with random letters
-  while (result.length < length) {
-    result += pool.charAt(Math.floor(Math.random() * pool.length));
-  }
-
-  // Shuffle password
+  for (let i = 0; i < numbers; i++) result += digits[Math.floor(Math.random() * digits.length)];
+  for (let i = 0; i < specials; i++) result += specialChars[Math.floor(Math.random() * specialChars.length)];
+  while (result.length < length) result += pool[Math.floor(Math.random() * pool.length)];
   return result.split('').sort(() => Math.random() - 0.5).join('');
 }
 
 // ---------------------------
-// 🔹 Gamified Mode
+// Gamified Mode
 // ---------------------------
 const startGameBtn = document.getElementById("start-game-btn");
 const gameArea = document.getElementById("game-area");
@@ -162,10 +144,11 @@ const gameMusic = document.getElementById("game-music");
 
 let currentLevel = 0;
 let builtPassword = "";
+
 const questions = [
   { q: "🍹 Name your favorite drink", validate: ans => ans.length > 0 },
   { q: "🔥 Write one of these logos: Nike, Apple, Adidas", validate: ans => /(nike|apple|adidas)/i.test(ans) },
-  { q: "➕ Write a number that adds up to 35 (e.g., 20+15)", validate: ans => eval(ans) === 35 },
+  { q: "➕ Write a number that adds up to 35 (e.g., 20+15)", validate: ans => { try { return eval(ans) === 35; } catch { return false; } } },
   { q: "🔢 Now write 35 in Roman numerals", validate: ans => /^xxxv$/i.test(ans) }
 ];
 
@@ -193,7 +176,7 @@ submitAnswerBtn.addEventListener("click", () => {
       gameMusic.pause();
     }
   } else {
-    alert("❌ Wrong answer! Try again.");
+    alert("❌ Rule not met! Try again.");
   }
 });
 
@@ -201,3 +184,6 @@ function askQuestion() {
   gameQuestion.textContent = `Level ${currentLevel + 1}: ${questions[currentLevel].q}`;
 }
 
+function askQuestion() {
+  gameQuestion.textContent = `Level ${currentLevel + 1}: ${questions[currentLevel].q}`;
+}
