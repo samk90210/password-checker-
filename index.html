@@ -1,36 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Password Strength Checker</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Password Checker & Generator</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
-    <h1>Password Strength Checker</h1>
-
-    <p><strong>Requirements:</strong></p>
-    <ul>
-      <li><span class="bad">Weak:</span> Fewer than 3 of the rules met</li>
-      <li><span class="medium">Intermediate:</span> 3–4 rules met</li>
-      <li><span class="strong">Strong:</span> All 5 rules met</li>
-    </ul>
-
-    <input type="password" id="password" placeholder="Enter your password" />
+    <h1>Password Checker</h1>
+    <input type="password" id="password" placeholder="Enter your password">
+    
     <div class="controls">
-      <label><input type="checkbox" id="toggle-password" /> Show password</label>
+      <label>
+        <input type="checkbox" id="toggle-password"> Show Password
+      </label>
       <button id="copy-btn">📋 Copy</button>
     </div>
 
-    <div id="strength-text"></div>
-
+    <div id="strength-text">Strength: </div>
     <div class="progress-bar">
       <div id="progress-fill"></div>
     </div>
 
-    <h3>Checklist:</h3>
     <ul id="requirements"></ul>
+
+    <!-- 🔹 Password Generator -->
+    <h2>Password Generator</h2>
+    <label>Length: <span id="length-value">12</span></label>
+    <input type="range" id="length-slider" min="8" max="32" value="12">
+    
+    <label>Numbers: <span id="number-value">2</span></label>
+    <input type="range" id="number-slider" min="0" max="10" value="2">
+    
+    <label>Special Characters: <span id="special-value">2</span></label>
+    <input type="range" id="special-slider" min="0" max="10" value="2">
+    
+    <button id="generate-btn">🎲 Generate Password</button>
+
+    <!-- 🔹 Gamification -->
+    <h2>Gamify Your Password</h2>
+    <button id="start-game-btn">🎮 Start Game Mode</button>
+    <audio id="game-music" loop>
+      <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+    </audio>
+    <div id="game-area" style="display:none;">
+      <p id="game-question"></p>
+      <input type="text" id="game-answer" placeholder="Type answer here">
+      <button id="submit-answer-btn">Submit</button>
+    </div>
   </div>
 
   <script src="script.js"></script>
