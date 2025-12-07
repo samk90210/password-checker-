@@ -1,143 +1,212 @@
 /* script.js
-   Full rewrite: password checker, generator modal, gamified strong-password questions,
-   YouTube lofi background player + controls, and light/dark toggle.
+   - Password checker (main focus)
+   - Slide-in full-screen gamified mode (A)
+   - Settings panel (music + theme) at top-right
+   - Generator modal
+   - Smooth animations & persisted theme/music prefs
 */
 
+const YT_VIDEO_ID = "8b3fqIBrNW0"; // user's lofi YouTube ID
+const MUSIC_PREF_KEY = "pw_music_prefs_v1";
+const THEME_KEY = "pw_theme_v1";
+
 document.addEventListener("DOMContentLoaded", () => {
-  /* ---------------------------
-     Helpers & DOM refs
-  --------------------------- */
-  const $ = sel => document.querySelector(sel);
-  const $$ = sel => Array.from(document.querySelectorAll(sel));
+  // DOM refs
+  const settingsBtn = document.getElementById("settingsBtn");
+  const settingsPanel = document.getElementById("settingsPanel");
+  const closeSettings = document.getElementById("closeSettings");
+  const themeToggle = document.getElementById("themeToggle");
+  const playPauseBtn = document.getElementById("playPauseBtn");
+  const volumeSlider = document.getElementById("volumeSlider");
+  const openGeneratorSmall = document.getElementById("openGeneratorSmall");
 
-  // Existing elements (assume they exist based on your HTML)
-  const passwordInput = $("#password");
-  const strengthText = $("#strength-text");
-  const requirementsList = $("#requirements");
-  const togglePassword = $("#toggle-password");
-  const copyBtn = $("#copy-btn");
-  const progressFill = $("#progress-fill");
+  const mainCard = document.querySelector(".main-card");
+  const modePassword = document.getElementById("modePassword");
+  const modeGamified = document.getElementById("modeGamified");
 
-  // Modal/generator elements
-  const openGeneratorBtn = $("#open-generator-btn");
-  const generatorModal = $("#generator-modal");
-  const closeModal = document.querySelector(".close");
-  const generateBtn = $("#generate-btn");
-  const lengthSlider = $("#length-slider");
-  const numberSlider = $("#number-slider");
-  const specialSlider = $("#special-slider");
-  const lengthValue = $("#length-value");
-  const numberValue = $("#number-value");
-  const specialValue = $("#special-value");
+  const passwordInput = document.getElementById("password");
+  const togglePassword = document.getElementById("toggle-password");
+  const copyBtn = document.getElementById("copy-btn");
+  const openGeneratorBtn = document.getElementById("open-generator-btn");
 
-  // Game mode
-  const startGameBtn = $("#start-game-btn");
-  const gameArea = $("#game-area");
-  const gameQuestion = $("#game-question");
-  const gameAnswer = $("#game-answer");
-  const submitAnswerBtn = $("#submit-answer-btn");
-  // note: we won't use the old <audio id="game-music">; we keep it but won't rely on it
-  const gameMusicEl = $("#game-music");
+  const strengthText = document.getElementById("strength-text");
+  const progressFill = document.getElementById("progress-fill");
+  const requirementsList = document.getElementById("requirements");
 
-  /* ---------------------------
-     Theme (Light / Dark) Toggle
-     - toggles 'theme-dark' on body
-     - persists in localStorage
-  --------------------------- */
-  const THEME_KEY = "pw_theme";
-  function createThemeToggle() {
-    if ($("#theme-toggle")) return; // already created
-    const ctl = document.createElement("div");
-    ctl.id = "theme-toggle";
-    ctl.style.position = "fixed";
-    ctl.style.left = "20px";
-    ctl.style.top = "20px";
-    ctl.style.zIndex = "999";
-    ctl.style.background = "rgba(255,255,255,0.9)";
-    ctl.style.borderRadius = "12px";
-    ctl.style.padding = "8px";
-    ctl.style.boxShadow = "0 6px 18px rgba(0,0,0,0.08)";
-    ctl.style.display = "flex";
-    ctl.style.alignItems = "center";
-    ctl.style.gap = "8px";
+  // Game panel refs
+  const gamePanel = document.getElementById("gamePanel");
+  const closeGame = document.getElementById("closeGame");
+  const gameQuestion = document.getElementById("gameQuestion");
+  const gameAnswer = document.getElementById("gameAnswer");
+  const submitAnswerBtn = document.getElementById("submit-answer-btn");
+  const skipBtn = document.getElementById("skip-btn");
+  const gameProgress = document.getElementById("gameProgress");
+  const gameMessage = document.getElementById("gameMessage");
 
-    const label = document.createElement("span");
-    label.textContent = "Theme:";
-    label.style.fontSize = "13px";
-    label.style.color = "#333";
+  // Generator modal refs
+  const generatorModal = document.getElementById("generator-modal");
+  const generatorClose = document.getElementById("generator-close");
+  const lengthSlider = document.getElementById("length-slider");
+  const numberSlider = document.getElementById("number-slider");
+  const specialSlider = document.getElementById("special-slider");
+  const lengthValue = document.getElementById("length-value");
+  const numberValue = document.getElementById("number-value");
+  const specialValue = document.getElementById("special-value");
+  const generateBtn = document.getElementById("generate-btn");
+  const generatorCancel = document.getElementById("generator-cancel");
 
-    const btn = document.createElement("button");
-    btn.textContent = "🌙";
-    btn.style.border = "none";
-    btn.style.background = "transparent";
-    btn.style.cursor = "pointer";
-    btn.title = "Toggle light / dark";
+  // Persisted state helpers
+  function saveTheme(dark) { localStorage.setItem(THEME_KEY, dark ? "dark" : "light"); }
+  function loadTheme() { return localStorage.getItem(THEME_KEY) === "dark"; }
 
-    btn.addEventListener("click", () => {
-      const isDark = document.body.classList.toggle("theme-dark");
-      localStorage.setItem(THEME_KEY, isDark ? "dark" : "light");
-      btn.textContent = isDark ? "☀️" : "🌙";
-      // Small visual tweak for control background when dark
-      ctl.style.background = isDark ? "rgba(20,20,20,0.8)" : "rgba(255,255,255,0.9)";
-      label.style.color = isDark ? "#eee" : "#333";
-    });
-
-    ctl.appendChild(label);
-    ctl.appendChild(btn);
-    document.body.appendChild(ctl);
-
-    // initialize from storage
-    const stored = localStorage.getItem(THEME_KEY) || "light";
-    if (stored === "dark") {
-      document.body.classList.add("theme-dark");
-      btn.textContent = "☀️";
-      ctl.style.background = "rgba(20,20,20,0.8)";
-      label.style.color = "#eee";
-    }
+  function saveMusicPrefs(prefs) {
+    localStorage.setItem(MUSIC_PREF_KEY, JSON.stringify(prefs));
+  }
+  function loadMusicPrefs() {
+    try { return JSON.parse(localStorage.getItem(MUSIC_PREF_KEY)); } catch { return null; }
   }
 
-  /* Minimal dark-mode CSS injection (since user asked for toggle but CSS might not include styles).
-     This injects a few variables for easy dark styling; you can expand in your CSS later.
-  */
-  (function injectThemeStyles() {
-    const css = `
-      body.theme-dark {
-        background: linear-gradient(145deg,#0f1724,#0b1220) !important;
-        color: #e6eef8;
-      }
-      body.theme-dark .container {
-        background: #071028 !important;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.6);
-        color: #e6eef8;
-      }
-      body.theme-dark input, body.theme-dark .modal-content {
-        background: #081426;
-        color: #e6eef8;
-        border-color: #173046;
-      }
-      body.theme-dark #copy-btn { background: #0b2633; color: #e6eef8; }
-      body.theme-dark .music-controls { background: rgba(255,255,255,0.03); color: #e6eef8; }
-    `;
-    const style = document.createElement("style");
-    style.innerHTML = css;
-    document.head.appendChild(style);
-  })();
+  /* ---------------------------
+     THEME INIT
+  --------------------------- */
+  function applyTheme(dark) {
+    document.body.classList.toggle("dark", !!dark);
+    themeToggle.textContent = dark ? "Switch to Light" : "Switch to Dark";
+  }
+  applyTheme(loadTheme());
 
-  createThemeToggle();
+  themeToggle.addEventListener("click", () => {
+    const isDark = !document.body.classList.contains("dark");
+    applyTheme(isDark);
+    saveTheme(isDark);
+  });
 
   /* ---------------------------
-     Password Checker
+     SETTINGS PANEL (open/close)
   --------------------------- */
+  settingsBtn.addEventListener("click", () => {
+    settingsPanel.classList.toggle("open");
+    settingsPanel.setAttribute("aria-hidden", settingsPanel.classList.contains("open") ? "false" : "true");
+  });
+  closeSettings.addEventListener("click", () => {
+    settingsPanel.classList.remove("open");
+    settingsPanel.setAttribute("aria-hidden", "true");
+  });
+  // Close with escape
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      settingsPanel.classList.remove("open");
+    }
+  });
 
-  function evaluatePassword(password) {
-    const lengthOK = password.length >= 12;
-    const lengthStrong = password.length >= 14;
-    const hasUpper = /[A-Z]/.test(password);
-    const hasLower = /[a-z]/.test(password);
-    const hasNumber = /[0-9]/.test(password);
-    const hasSpecial = /[\W_]/.test(password);
+  /* ---------------------------
+     YouTube IFrame Player for lofi
+     - autoplay muted allowed by browsers; user can unmute via controls
+  --------------------------- */
+  let ytPlayer = null;
+  let ytReady = false;
 
-    // More nuanced scoring for progress bar (0..5)
+  // create controls initial state & load saved prefs
+  const savedPrefs = loadMusicPrefs() || { volume: 0.5, muted: true, playing: true };
+  volumeSlider.value = savedPrefs.volume ?? 0.5;
+  playPauseBtn.textContent = savedPrefs.playing ? "⏸ Pause" : "▶ Play";
+
+  // load YT API
+  (function loadYT() {
+    const tag = document.createElement("script");
+    tag.src = "https://www.youtube.com/iframe_api";
+    document.head.appendChild(tag);
+  })();
+
+  window.onYouTubeIframeAPIReady = function () {
+    const holder = document.getElementById("yt-holder");
+    const div = document.createElement("div");
+    div.id = "yt-player";
+    holder.appendChild(div);
+
+    ytPlayer = new YT.Player("yt-player", {
+      height: "0", width: "0", videoId: YT_VIDEO_ID,
+      playerVars: { autoplay: 1, controls: 0, loop: 1, modestbranding: 1, rel: 0, playlist: YT_VIDEO_ID },
+      events: {
+        onReady: (e) => {
+          ytReady = true;
+          const vol = Math.round((savedPrefs.volume ?? 0.5) * 100);
+          e.target.setVolume(vol);
+          if (savedPrefs.muted) e.target.mute(); else e.target.unMute();
+          // attempt play (muted autoplay should work)
+          try { e.target.playVideo(); } catch {}
+        },
+        onStateChange: (e) => {
+          // keep looped or update state UI if desired
+        }
+      }
+    });
+  };
+
+  // Controls
+  playPauseBtn.addEventListener("click", () => {
+    if (!ytReady) return;
+    const state = ytPlayer.getPlayerState();
+    if (state === YT.PlayerState.PLAYING) {
+      ytPlayer.pauseVideo();
+      playPauseBtn.textContent = "▶ Play";
+      savedPrefs.playing = false;
+    } else {
+      ytPlayer.playVideo();
+      playPauseBtn.textContent = "⏸ Pause";
+      savedPrefs.playing = true;
+    }
+    saveMusicPrefs(savedPrefs);
+  });
+
+  volumeSlider.addEventListener("input", () => {
+    const v = parseFloat(volumeSlider.value);
+    if (ytReady && ytPlayer.setVolume) {
+      ytPlayer.setVolume(Math.round(v * 100));
+      if (v > 0 && ytPlayer.isMuted && ytPlayer.isMuted()) {
+        ytPlayer.unMute();
+        savedPrefs.muted = false;
+      }
+    }
+    savedPrefs.volume = v;
+    saveMusicPrefs(savedPrefs);
+  });
+
+  // small "open generator" in settings
+  openGeneratorSmall.addEventListener("click", () => {
+    settingsPanel.classList.remove("open");
+    openGenerator(); 
+  });
+
+  /* ---------------------------
+     MODE SWITCHING (no dropdown)
+  --------------------------- */
+  function setActiveMode(mode) {
+    if (mode === "password") {
+      modePassword.classList.add("active");
+      modeGamified.classList.remove("active");
+      // close game if open
+      closeGamePanel();
+    } else {
+      modePassword.classList.remove("active");
+      modeGamified.classList.add("active");
+      openGamePanel();
+    }
+  }
+  modePassword.addEventListener("click", () => setActiveMode("password"));
+  modeGamified.addEventListener("click", () => setActiveMode("gamified"));
+
+  /* ---------------------------
+     PASSWORD CHECKER LOGIC
+  --------------------------- */
+  function evaluatePassword(pw) {
+    const lengthOK = pw.length >= 12;
+    const lengthStrong = pw.length >= 14;
+    const hasUpper = /[A-Z]/.test(pw);
+    const hasLower = /[a-z]/.test(pw);
+    const hasNumber = /[0-9]/.test(pw);
+    const hasSpecial = /[\W_]/.test(pw);
+
     let score = 0;
     if (lengthOK) score++;
     if (hasUpper) score++;
@@ -145,452 +214,310 @@ document.addEventListener("DOMContentLoaded", () => {
     if (hasNumber) score++;
     if (hasSpecial) score++;
 
-    let strength, color;
+    let strength = "Requirements not met ❌";
+    let color = "var(--danger)";
+
     if (!lengthOK) {
       strength = "Requirements not met ❌";
-      color = "#e74c3c";
-      score = Math.min(score, 1);
+      color = "var(--danger)";
     } else if (lengthStrong && score === 5) {
       strength = "Strong ✅";
-      color = "#16a34a";
+      color = "var(--good)";
     } else {
       strength = "Intermediate ⚠️";
-      color = "#f59e0b";
+      color = "var(--warn)";
     }
 
-    return {
-      strength,
-      color,
-      score,
-      requirements: { lengthOK, lengthStrong, hasUpper, hasLower, hasNumber, hasSpecial }
-    };
+    return { strength, color, score, requirements: { lengthOK, lengthStrong, hasUpper, hasLower, hasNumber, hasSpecial } };
   }
 
-  function updateRequirements(reqs) {
+  function refreshUIFromPassword() {
+    const pw = passwordInput.value || "";
+    const res = evaluatePassword(pw);
+    strengthText.textContent = `Strength: ${res.strength}`;
+    strengthText.style.color = "";
+
+    // update progress
+    const percent = (res.score / 5) * 100;
+    progressFill.style.width = percent + "%";
+    // set color
+    if (res.color === "var(--good)") progressFill.style.background = "var(--good)";
+    else if (res.color === "var(--warn)") progressFill.style.background = "var(--warn)";
+    else progressFill.style.background = "var(--danger)";
+
+    // requirements list
     requirementsList.innerHTML = `
-      <li style="color: ${reqs.lengthOK ? "green" : "red"}">✔️ At least 12 characters</li>
-      <li style="color: ${reqs.hasUpper ? "green" : "red"}">✔️ Uppercase letter</li>
-      <li style="color: ${reqs.hasLower ? "green" : "red"}">✔️ Lowercase letter</li>
-      <li style="color: ${reqs.hasNumber ? "green" : "red"}">✔️ Number</li>
-      <li style="color: ${reqs.hasSpecial ? "green" : "red"}">✔️ Special character</li>
-      <li style="color: ${reqs.lengthStrong ? "green" : "orange"}">⭐ 14+ chars for max strength</li>
+      <li style="color:${res.requirements.lengthOK ? '#16a34a' : '#ef4444'}">✔️ At least 12 characters</li>
+      <li style="color:${res.requirements.hasUpper ? '#16a34a' : '#ef4444'}">✔️ Uppercase letter</li>
+      <li style="color:${res.requirements.hasLower ? '#16a34a' : '#ef4444'}">✔️ Lowercase letter</li>
+      <li style="color:${res.requirements.hasNumber ? '#16a34a' : '#ef4444'}">✔️ Number</li>
+      <li style="color:${res.requirements.hasSpecial ? '#16a34a' : '#ef4444'}">✔️ Special character</li>
+      <li style="color:${res.requirements.lengthStrong ? '#16a34a' : '#f59e0b'}">⭐ 14+ chars for max strength</li>
     `;
   }
 
-  function updateProgressBar(score, color) {
-    const percent = (score / 5) * 100;
-    progressFill.style.width = `${percent}%`;
-    progressFill.style.backgroundColor = color;
-  }
-
-  passwordInput?.addEventListener("input", () => {
-    const result = evaluatePassword(passwordInput.value);
-    strengthText.textContent = `Strength: ${result.strength}`;
-    strengthText.style.color = result.color;
-    updateRequirements(result.requirements);
-    updateProgressBar(result.score, result.color);
+  passwordInput.addEventListener("input", () => {
+    refreshUIFromPassword();
   });
 
-  togglePassword?.addEventListener("change", function () {
-    if (!passwordInput) return;
+  togglePassword.addEventListener("change", function() {
     passwordInput.type = this.checked ? "text" : "password";
   });
 
-  copyBtn?.addEventListener("click", async () => {
-    if (!passwordInput) return;
+  copyBtn.addEventListener("click", async () => {
     try {
       await navigator.clipboard.writeText(passwordInput.value);
-      const prev = copyBtn.textContent;
+      const txt = copyBtn.textContent;
       copyBtn.textContent = "✅ Copied!";
-      setTimeout(() => { copyBtn.textContent = prev; }, 1400);
-    } catch (err) {
-      alert("Unable to copy. Please select and copy manually.");
+      setTimeout(() => copyBtn.textContent = txt, 1400);
+    } catch {
+      alert("Unable to copy. Please select the password and copy manually.");
     }
   });
 
   /* ---------------------------
-     Password Generator Modal
+     GENERATOR MODAL
   --------------------------- */
-  function openModal() { generatorModal.style.display = "block"; }
-  function closeModalFn() { generatorModal.style.display = "none"; }
-  openGeneratorBtn?.addEventListener("click", openModal);
-  closeModal?.addEventListener("click", closeModalFn);
-  window.addEventListener("click", (e) => {
-    if (e.target === generatorModal) closeModalFn();
-  });
-
-  // Update slider values initially
-  function refreshSliderValues() {
-    if (lengthValue) lengthValue.textContent = lengthSlider?.value ?? "12";
-    if (numberValue) numberValue.textContent = numberSlider?.value ?? "2";
-    if (specialValue) specialValue.textContent = specialSlider?.value ?? "2";
+  function openGenerator() {
+    // show modal
+    generatorModal.classList.add("show");
+    generatorModal.setAttribute("aria-hidden", "false");
   }
-  refreshSliderValues();
-  [lengthSlider, numberSlider, specialSlider].forEach(sl => {
-    if (!sl) return;
-    sl.addEventListener("input", refreshSliderValues);
-  });
+  function closeGenerator() {
+    generatorModal.classList.remove("show");
+    generatorModal.setAttribute("aria-hidden", "true");
+  }
 
-  function generatePassword(length = 12, numbers = 2, specials = 2) {
+  openGeneratorBtn.addEventListener("click", openGenerator);
+  generatorClose.addEventListener("click", closeGenerator);
+  generatorCancel.addEventListener("click", closeGenerator);
+  // small open in settings
+  openGeneratorSmall.addEventListener("click", openGenerator);
+
+  // slider live values
+  function refreshSliderLabels() {
+    lengthValue.textContent = lengthSlider.value;
+    numberValue.textContent = numberSlider.value;
+    specialValue.textContent = specialSlider.value;
+  }
+  [lengthSlider, numberSlider, specialSlider].forEach(sl => sl.addEventListener("input", refreshSliderLabels));
+  refreshSliderLabels();
+
+  function generatePassword(length=12,numbers=2,specials=2) {
     const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     const digits = "0123456789";
     const specialChars = "!@#$%^&*()-_=+[]{}<>?/|";
-    let result = [];
-
-    // Force at least the number of digits/specials requested
-    for (let i = 0; i < numbers; i++) result.push(digits[Math.floor(Math.random() * digits.length)]);
-    for (let i = 0; i < specials; i++) result.push(specialChars[Math.floor(Math.random() * specialChars.length)]);
-    while (result.length < length) result.push(letters[Math.floor(Math.random() * letters.length)]);
-    // Shuffle
-    for (let i = result.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [result[i], result[j]] = [result[j], result[i]];
+    const arr = [];
+    for(let i=0;i<numbers;i++) arr.push(digits[Math.floor(Math.random()*digits.length)]);
+    for(let i=0;i<specials;i++) arr.push(specialChars[Math.floor(Math.random()*specialChars.length)]);
+    while(arr.length < length) arr.push(letters[Math.floor(Math.random()*letters.length)]);
+    // shuffle
+    for(let i = arr.length -1; i>0; i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
     }
-    return result.join("");
+    return arr.join("");
   }
 
-  generateBtn?.addEventListener("click", () => {
-    const length = parseInt(lengthSlider?.value || 12, 10);
-    const numbers = parseInt(numberSlider?.value || 2, 10);
-    const specials = parseInt(specialSlider?.value || 2, 10);
-    const pw = generatePassword(length, numbers, specials);
-    if (passwordInput) {
-      passwordInput.value = pw;
-      passwordInput.dispatchEvent(new Event("input"));
-    }
-    closeModalFn();
+  generateBtn.addEventListener("click", () => {
+    const len = parseInt(lengthSlider.value, 10);
+    const nums = parseInt(numberSlider.value, 10);
+    const specs = parseInt(specialSlider.value, 10);
+    const pw = generatePassword(len, nums, specs);
+    passwordInput.value = pw;
+    refreshUIFromPassword();
+    closeGenerator();
   });
 
   /* ---------------------------
-     Gamified Mode - Security-focused questions (Option C)
-     We'll design a sequence of validators that ensure the final built password is strong.
-     Each level returns a string snippet to append to builtPassword when validated.
+     GAMIFIED MODE (slide-in full-screen)
+     Security-focused steps (option C)
   --------------------------- */
-  let currentLevel = 0;
-  let builtPassword = "";
-
-  const securityQuestions = [
-    // 1: Two uppercase letters (exactly two)
-    {
-      q: "Type exactly 2 UPPERCASE letters (e.g., AB)",
-      validate: ans => /^[A-Z]{2}$/.test(ans),
-      transform: ans => ans
-    },
-    // 2: Symbol + number (single symbol from set + single digit)
-    {
-      q: "Type a symbol from !@#$%^&* followed by a single digit (e.g., @5)",
-      validate: ans => /^[!@#$%^&*][0-9]$/.test(ans),
-      transform: ans => ans
-    },
-    // 3: Three random lowercase letters (nonsense)
-    {
-      q: "Type 3 random lowercase letters (e.g., xqz)",
-      validate: ans => /^[a-z]{3}$/.test(ans),
-      transform: ans => ans
-    },
-    // 4: 4-digit number not sequential or repeating (e.g., 1739 is ok, 1234 or 1111 not)
-    {
-      q: "Enter a 4-digit number that is not sequential (1234) nor all repeated (1111)",
-      validate: ans => {
-        if (!/^[0-9]{4}$/.test(ans)) return false;
-        // not all the same
-        if (/^([0-9])\1{3}$/.test(ans)) return false;
-        // not strictly increasing or decreasing sequence
-        const digits = ans.split("").map(Number);
-        let inc = true, dec = true;
-        for (let i = 1; i < digits.length; i++) {
-          if (digits[i] !== digits[i-1] + 1) inc = false;
-          if (digits[i] !== digits[i-1] - 1) dec = false;
+  const securitySteps = [
+    { q: "Type exactly 2 UPPERCASE letters (e.g., AB)", test: s => /^[A-Z]{2}$/.test(s), transform: s => s },
+    { q: "Type a symbol from !@#$%^&* followed by a single digit (e.g., @5)", test: s => /^[!@#$%^&*][0-9]$/.test(s), transform: s => s },
+    { q: "Type 3 random lowercase letters (e.g., xqz)", test: s => /^[a-z]{3}$/.test(s), transform: s => s },
+    { q: "Enter a 4-digit number that is NOT sequential like 1234 or all repeated like 1111", test: s => {
+        if(!/^[0-9]{4}$/.test(s)) return false;
+        if(/^([0-9])\1{3}$/.test(s)) return false;
+        const digits = s.split("").map(Number);
+        let inc=true, dec=true;
+        for(let i=1;i<digits.length;i++){
+          if(digits[i] !== digits[i-1]+1) inc=false;
+          if(digits[i] !== digits[i-1]-1) dec=false;
         }
-        if (inc || dec) return false;
+        if(inc||dec) return false;
         return true;
-      },
-      transform: ans => ans
-    },
-    // 5: Two words concatenated with a symbol in middle (word1!word2)
-    {
-      q: "Type two short words (3-6 letters each) joined by a symbol, e.g., moon#lake",
-      validate: ans => {
-        const m = ans.match(/^([a-zA-Z]{3,6})([!@#$%^&*])([a-zA-Z]{3,6})$/);
-        return !!m;
-      },
-      transform: ans => ans
-    }
+      }, transform: s => s },
+    { q: "Type two short words (3-6 letters) joined by a symbol (e.g., moon#lake)", test: s => /^([A-Za-z]{3,6})([!@#$%^&*])([A-Za-z]{3,6})$/.test(s), transform: s => s }
   ];
 
-  function askGameQuestion() {
-    const level = securityQuestions[currentLevel];
-    gameQuestion.textContent = `Level ${currentLevel + 1}: ${level.q}`;
+  let gameIndex = 0;
+  let builtPassword = "";
+
+  function openGamePanel() {
+    // slide in
+    gamePanel.classList.add("open");
+    gamePanel.setAttribute("aria-hidden", "false");
+    mainCard.style.transform = "translateX(-6%) scale(.995)";
+    // initialize game
+    gameIndex = 0;
+    builtPassword = "";
+    showGameStep();
   }
 
-  startGameBtn?.addEventListener("click", () => {
-    if (!gameArea) return;
-    gameArea.style.display = "block";
-    startGameBtn.style.display = "none";
-    currentLevel = 0;
-    builtPassword = "";
-    // optionally play small game music (we use gameMusicEl if present)
-    try { gameMusicEl?.play().catch(()=>{}); } catch(e){}
-    askGameQuestion();
-  });
+  function closeGamePanel() {
+    gamePanel.classList.remove("open");
+    gamePanel.setAttribute("aria-hidden", "true");
+    mainCard.style.transform = "";
+    // clear inputs
+    gameAnswer.value = "";
+    gameMessage.textContent = "";
+  }
 
-  submitAnswerBtn?.addEventListener("click", () => {
-    const ans = (gameAnswer?.value || "").trim();
-    const levelObj = securityQuestions[currentLevel];
-    if (levelObj.validate(ans)) {
-      builtPassword += levelObj.transform(ans);
-      currentLevel++;
-      gameAnswer.value = "";
-      if (currentLevel < securityQuestions.length) {
-        askGameQuestion();
+  function showGameStep() {
+    const step = securitySteps[gameIndex];
+    gameQuestion.textContent = step.q;
+    gameProgress.textContent = `Step ${gameIndex+1} / ${securitySteps.length}`;
+    gameAnswer.value = "";
+    gameMessage.textContent = "";
+  }
+
+  submitAnswerBtn.addEventListener("click", () => {
+    const val = (gameAnswer.value || "").trim();
+    const step = securitySteps[gameIndex];
+    if (step.test(val)) {
+      builtPassword += step.transform(val);
+      gameMessage.textContent = "✅ Good!";
+      gameMessage.classList.add("ok");
+      setTimeout(() => gameMessage.textContent = "", 900);
+      gameIndex++;
+      if (gameIndex < securitySteps.length) {
+        // animate next step
+        animateGameStepTransition(showGameStep);
       } else {
-        // final password ready
-        if (passwordInput) {
-          passwordInput.value = builtPassword;
-          passwordInput.dispatchEvent(new Event("input"));
-        }
-        gameArea.innerHTML = `<p style="font-weight:600; padding:12px;">🎉 Strong gamified password created!</p>
-                              <p style="font-size:0.9rem; color:#555;">You can copy the password or regenerate with the generator.</p>`;
-        try { gameMusicEl?.pause(); } catch(e){}
+        // finished: set to password input, close panel
+        passwordInput.value = builtPassword;
+        refreshUIFromPassword();
+        gameMessage.textContent = "🎉 Password built and filled in!";
+        setTimeout(() => {
+          closeGamePanel();
+          setActiveModeUI("password");
+        }, 1100);
       }
     } else {
-      // nicer inline error instead of alert
-      flashInvalid("That doesn't match the requirement — try again.");
+      flashGameMessage("That doesn't match the requirement. Try again.");
     }
   });
 
-  function flashInvalid(msg) {
-    const prev = gameArea.querySelector(".invalid-msg");
-    if (prev) prev.remove();
-    const p = document.createElement("div");
-    p.className = "invalid-msg";
-    p.textContent = `❌ ${msg}`;
-    p.style.color = "#c0392b";
-    p.style.marginTop = "8px";
-    p.style.fontSize = "0.95rem";
-    gameArea.appendChild(p);
-    setTimeout(() => p.remove(), 2200);
-  }
-
-  /* ---------------------------
-     YouTube Lofi Background Player + Controls
-     - Uses the IFrame API so we can set volume and control playback
-     - We autoplay muted on load (browser autoplay rules).
-     - The control UI is created dynamically in top-right if not present.
-  --------------------------- */
-
-  // Only one player instance
-  let ytPlayer = null;
-  let ytReady = false;
-  const YT_VIDEO_ID = "8b3fqIBrNW0"; // from user link
-  const MUSIC_KEY = "pw_music_pref"; // stores {volume,muted,playing}
-
-  // create controls container
-  function createMusicControlsUI() {
-    if ($(".music-controls")) return; // already created
-    const wrapper = document.createElement("div");
-    wrapper.className = "music-controls";
-    wrapper.style.position = "fixed";
-    wrapper.style.right = "20px";
-    wrapper.style.top = "20px";
-    wrapper.style.background = "white";
-    wrapper.style.borderRadius = "12px";
-    wrapper.style.padding = "10px";
-    wrapper.style.boxShadow = "0 6px 18px rgba(0,0,0,0.08)";
-    wrapper.style.display = "flex";
-    wrapper.style.gap = "8px";
-    wrapper.style.alignItems = "center";
-    wrapper.style.zIndex = "999";
-
-    const playBtn = document.createElement("button");
-    playBtn.id = "yt-play";
-    playBtn.textContent = "▶ Play";
-    playBtn.style.padding = "6px 10px";
-    playBtn.style.borderRadius = "8px";
-    playBtn.style.cursor = "pointer";
-
-    const muteBtn = document.createElement("button");
-    muteBtn.id = "yt-mute";
-    muteBtn.textContent = "🔇";
-    muteBtn.style.padding = "6px 10px";
-    muteBtn.style.borderRadius = "8px";
-    muteBtn.style.cursor = "pointer";
-
-    const vol = document.createElement("input");
-    vol.type = "range";
-    vol.min = "0";
-    vol.max = "1";
-    vol.step = "0.01";
-    vol.value = "0.5";
-    vol.id = "yt-volume";
-    vol.style.width = "90px";
-
-    // invisible iframe container
-    const iframeHolder = document.createElement("div");
-    iframeHolder.id = "yt-iframe-holder";
-    iframeHolder.style.width = "0";
-    iframeHolder.style.height = "0";
-    iframeHolder.style.overflow = "hidden";
-    iframeHolder.style.position = "absolute";
-
-    wrapper.appendChild(playBtn);
-    wrapper.appendChild(muteBtn);
-    wrapper.appendChild(vol);
-    document.body.appendChild(wrapper);
-    document.body.appendChild(iframeHolder);
-
-    // events
-    playBtn.addEventListener("click", () => {
-      if (!ytReady) return;
-      ytPlayer.getPlayerState && (ytPlayer.getPlayerState() !== 1 ? ytPlayer.playVideo() : ytPlayer.pauseVideo());
-    });
-
-    muteBtn.addEventListener("click", () => {
-      if (!ytReady) return;
-      if (ytPlayer.isMuted()) {
-        ytPlayer.unMute();
-        muteBtn.textContent = "🔊";
-      } else {
-        ytPlayer.mute();
-        muteBtn.textContent = "🔇";
-      }
-      saveMusicPrefs();
-    });
-
-    vol.addEventListener("input", () => {
-      if (!ytReady) return;
-      const v = Math.round(parseFloat(vol.value) * 100);
-      try { ytPlayer.setVolume(v); } catch (e) {}
-      saveMusicPrefs();
-    });
-  }
-
-  createMusicControlsUI();
-
-  // persist/load music prefs
-  function saveMusicPrefs() {
-    const volInput = $("#yt-volume");
-    const muteBtn = $("#yt-mute");
-    const playBtn = $("#yt-play");
-    const prefs = {
-      volume: volInput ? parseFloat(volInput.value) : 0.5,
-      muted: muteBtn ? muteBtn.textContent === "🔇" : false,
-      playing: (ytPlayer && ytReady) ? (ytPlayer.getPlayerState() === 1) : false
-    };
-    localStorage.setItem(MUSIC_KEY, JSON.stringify(prefs));
-  }
-  function loadMusicPrefs() {
-    const raw = localStorage.getItem(MUSIC_KEY);
-    if (!raw) return null;
-    try { return JSON.parse(raw); } catch { return null; }
-  }
-
-  // Load YT IFrame API
-  (function loadYTApi() {
-    if (window.YT && window.YT.Player) {
-      onYouTubeIframeAPIReady();
-      return;
+  skipBtn.addEventListener("click", () => {
+    // allow skip (adds a fallback random 3 chars)
+    const fallback = Math.random().toString(36).slice(2,5);
+    builtPassword += fallback;
+    gameIndex++;
+    if (gameIndex < securitySteps.length) animateGameStepTransition(showGameStep);
+    else {
+      passwordInput.value = builtPassword;
+      refreshUIFromPassword();
+      closeGamePanel();
+      setActiveModeUI("password");
     }
-    const tag = document.createElement("script");
-    tag.src = "https://www.youtube.com/iframe_api";
-    document.head.appendChild(tag);
-    // onYouTubeIframeAPIReady will be called by the API when ready
-  })();
+  });
 
-  // This function must be globally named for the YouTube IFrame API to call it.
-  window.onYouTubeIframeAPIReady = function () {
-    const holder = document.getElementById("yt-iframe-holder");
-    const playerDiv = document.createElement("div");
-    playerDiv.id = "yt-player";
-    holder.appendChild(playerDiv);
+  function flashGameMessage(text) {
+    gameMessage.classList.remove("ok");
+    gameMessage.textContent = text;
+    setTimeout(() => {
+      if (gameMessage.textContent === text) gameMessage.textContent = "";
+    }, 2000);
+  }
 
-    ytPlayer = new YT.Player("yt-player", {
-      height: "0",
-      width: "0",
-      videoId: YT_VIDEO_ID,
-      playerVars: {
-        autoplay: 1,
-        controls: 0,
-        rel: 0,
-        modestbranding: 1,
-        loop: 1,
-        playlist: YT_VIDEO_ID,
-        disablekb: 1,
-        fs: 0
-      },
-      events: {
-        onReady: (e) => {
-          ytReady = true;
-          // set initial prefs
-          const prefs = loadMusicPrefs() || { volume: 0.5, muted: true, playing: true };
-          // volume expects 0..100
-          try { ytPlayer.setVolume(Math.round((prefs.volume ?? 0.5) * 100)); } catch {}
-          const volInput = $("#yt-volume");
-          if (volInput) volInput.value = (prefs.volume ?? 0.5);
+  // small transition animation for the question card
+  function animateGameStepTransition(nextFn) {
+    const el = document.querySelector(".game-center");
+    el.style.transition = "transform .28s ease, opacity .28s ease";
+    el.style.transform = "translateX(-9px)";
+    el.style.opacity = "0.6";
+    setTimeout(() => {
+      nextFn();
+      el.style.transform = "translateX(0)";
+      el.style.opacity = "1";
+    }, 220);
+  }
 
-          if (prefs.muted) {
-            ytPlayer.mute();
-            $("#yt-mute").textContent = "🔇";
-          } else {
-            ytPlayer.unMute();
-            $("#yt-mute").textContent = "🔊";
-          }
+  closeGame.addEventListener("click", () => {
+    closeGamePanel();
+    setActiveModeUI("password");
+  });
 
-          // Attempt play; if browser blocks sound we are muted by default, so it's OK.
-          try { ytPlayer.playVideo(); } catch (e) {}
+  // ensure UI mode pills reflect external actions
+  function setActiveModeUI(mode){
+    if(mode === "password") {
+      modePassword.classList.add("active");
+      modeGamified.classList.remove("active");
+    } else {
+      modePassword.classList.remove("active");
+      modeGamified.classList.add("active");
+    }
+  }
 
-          // Wire up a small state observer for play/pause text
-          setInterval(() => {
-            const state = ytPlayer && ytReady ? ytPlayer.getPlayerState() : -1;
-            const playBtn = $("#yt-play");
-            if (!playBtn) return;
-            // Player states: 1=playing, 2=paused, -1=unstarted
-            if (state === 1) playBtn.textContent = "⏸ Pause";
-            else playBtn.textContent = "▶ Play";
-          }, 300);
-
-          // Save prefs periodically
-          setInterval(saveMusicPrefs, 2000);
-        },
-        onStateChange: (e) => {
-          // keep looped
-          if (e.data === YT.PlayerState.ENDED) {
-            try { ytPlayer.playVideo(); } catch (e) {}
-          }
-        }
-      }
-    });
-  };
+  // set initial UI
+  setActiveModeUI("password");
 
   /* ---------------------------
-     Small polish: keyboard support
+     Small UX helpers
   --------------------------- */
+  function setInitial() { refreshUIFromPassword(); }
+  setInitial();
+
+  // Keyboard: Enter submits game answer
+  gameAnswer.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") submitAnswerBtn.click();
+  });
+
+  // quick toggles
   document.addEventListener("keydown", (e) => {
-    // Enter in game answer to submit
-    if (e.key === "Enter" && gameArea?.style.display !== "none" && document.activeElement === gameAnswer) {
-      submitAnswerBtn?.click();
-    }
-    // Ctrl+G to open generator modal
-    if (e.ctrlKey && e.key.toLowerCase() === "g") {
-      openGeneratorBtn?.click();
-    }
+    if (e.key === "g" && e.ctrlKey) openGenerator();
   });
 
-  /* ---------------------------
-     Initial UI refresh
-  --------------------------- */
-  // Trigger initial evaluation (if there's already a value)
-  if (passwordInput && passwordInput.value) {
-    passwordInput.dispatchEvent(new Event("input"));
-  } else {
-    // show baseline requirements
-    updateRequirements({ lengthOK: false, lengthStrong: false, hasUpper: false, hasLower: false, hasNumber: false, hasSpecial: false });
-    updateProgressBar(0, "#e74c3c");
-    strengthText.textContent = "Strength: Requirements not met ❌";
-    strengthText.style.color = "#e74c3c";
+  // expose openGenerator to local scope
+  function openGenerator() {
+    generatorModal.classList.add("show");
+    generatorModal.setAttribute("aria-hidden", "false");
   }
 
-  // If sliders exist, ensure their labels match
-  refreshSliderValues();
+  // also allow clicking outside modal to close
+  generatorModal.addEventListener("click", (e) => {
+    if (e.target === generatorModal) closeGenerator();
+  });
+
+  // Close generator from its close button
+  function closeGenerator() {
+    generatorModal.classList.remove("show");
+    generatorModal.setAttribute("aria-hidden", "true");
+  }
+
+  // generator close button
+  generatorClose.addEventListener("click", closeGenerator);
+
+  /* ---------------------------
+     Load persisted music prefs (update UI)
+  --------------------------- */
+  window.addEventListener("beforeunload", () => {
+    // ensure prefs saved
+    saveMusicPrefs(savedPrefs);
+  });
+
+  // small safety: if YT API fails, optionally use fallbackAudio element (not provided)
+  // (Left as a placeholder if you want to use local mp3 fallback.)
+
+  // Reveal: small initial animation for the main card
+  mainCard.style.opacity = 0;
+  mainCard.style.transform = "translateY(8px)";
+  setTimeout(() => {
+    mainCard.style.transition = "transform .48s var(--ease), opacity .36s var(--ease)";
+    mainCard.style.opacity = 1;
+    mainCard.style.transform = "translateY(0)";
+  }, 80);
 
 }); // DOMContentLoaded end
