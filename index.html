@@ -1,14 +1,10 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Password Trainer — Checker & Gamified Mode</title>
-
-  <!-- Styles -->
-  <link rel="stylesheet" href="style.css" />
-
-  <!-- Font -->
+  <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -38,7 +34,18 @@
     </div>
 
     <div class="setting-row">
-      <div class="label">Extras</div>
+      <div class="label">History & Export</div>
+      <div class="row" style="gap:8px;">
+        <button id="openHistory" class="pill">View History</button>
+        <button id="exportHistory" class="pill">Export JSON</button>
+      </div>
+      <div style="margin-top:8px;font-size:12px;color:#888;">
+        Warning: Saved passwords are stored locally in your browser. Exported files are plaintext.
+      </div>
+    </div>
+
+    <div class="setting-row">
+      <div class="label">Quick Generator</div>
       <button id="openGeneratorSmall" class="pill">Open Generator</button>
     </div>
   </aside>
@@ -46,11 +53,11 @@
   <!-- INVISIBLE YouTube iframe holder for lofi -->
   <div id="yt-holder" aria-hidden="true"></div>
 
-  <!-- MAIN CONTENT (centered) -->
+  <!-- MAIN CONTENT -->
   <main class="main-card" id="mainCard">
     <header class="top">
       <h1>Password Checker</h1>
-      <p class="subtitle">Make strong passwords. Check strength in real time.</p>
+      <p class="subtitle">Real-time strength, entropy & time-to-crack estimates.</p>
     </header>
 
     <!-- Mode pills -->
@@ -69,11 +76,22 @@
     <div class="row small-row">
       <button id="copy-btn" class="secondary">📋 Copy</button>
       <button id="open-generator-btn" class="secondary">🎲 Generator</button>
+      <button id="saveHistoryBtn" class="secondary">💾 Save</button>
     </div>
 
     <!-- Strength / progress -->
     <div id="strength-text" class="strength">Strength: —</div>
-    <div class="progress-bar" aria-hidden="true"><div id="progress-fill"></div></div>
+    <div class="progress-row">
+      <div class="progress-bar" aria-hidden="true"><div id="progress-fill"></div></div>
+      <div id="entropy" class="entropy">Entropy: — bits</div>
+    </div>
+
+    <!-- Time-to-crack estimates -->
+    <div class="ttc">
+      <div class="ttc-row"><div>Online (1e3 guesses/s):</div><div id="ttc-1e3">—</div></div>
+      <div class="ttc-row"><div>Offline GPU (1e9 guesses/s):</div><div id="ttc-1e9">—</div></div>
+      <div class="ttc-row"><div>Powerful (1e12 guesses/s):</div><div id="ttc-1e12">—</div></div>
+    </div>
 
     <!-- Requirements -->
     <ul id="requirements" class="requirements"></ul>
@@ -121,6 +139,22 @@
       <div class="row">
         <button id="generate-btn" class="primary">Generate</button>
         <button id="generator-cancel" class="ghost">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY PANEL (modal) -->
+  <div id="history-modal" class="modal" aria-hidden="true">
+    <div class="modal-content">
+      <button class="close" id="history-close">✕</button>
+      <h3>Saved Passwords (local)</h3>
+      <div style="font-size:12px;color:#777;margin-bottom:8px;">
+        This history is saved locally in your browser. Do not save real passwords here.
+      </div>
+      <div id="history-list" style="max-height:320px;overflow:auto;"></div>
+      <div class="row" style="margin-top:12px;">
+        <button id="clearHistory" class="ghost">Clear</button>
+        <button id="downloadHistory" class="primary">Download JSON</button>
       </div>
     </div>
   </div>
