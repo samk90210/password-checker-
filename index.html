@@ -1,74 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Password Game & Checker</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Password Trainer</title>
+
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="style.css" />
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
-  <!-- Background Music -->
-  <audio id="bg-music" loop autoplay>
-    <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_f8e9079b94.mp3?filename=lofi-study-112191.mp3" type="audio/mpeg">
-  </audio>
 
-  <div class="music-controls">
-    <button id="music-toggle">⏸ Pause</button>
-    <input type="range" id="music-volume" min="0" max="1" step="0.01" value="0.5">
-  </div>
+    <div class="container">
+        
+        <!-- HEADER -->
+        <div class="header-row">
+            <h1>Password Trainer</h1>
+            <button id="themeToggle">Toggle Theme</button>
+        </div>
 
-  <div class="container">
-    <h1>Password Checker</h1>
+        <!-- MODE SELECTOR -->
+        <label for="modeSelect">Choose Mode:</label>
+        <select id="modeSelect">
+            <option value="normal">Normal Password Check</option>
+            <option value="gamified">Gamified Mode (Challenges)</option>
+        </select>
 
-    <input type="password" id="password" placeholder="Enter your password">
+        <!-- PASSWORD INPUT -->
+        <input type="password" id="passwordInput" placeholder="Enter your password..." />
 
-    <div class="controls">
-      <label><input type="checkbox" id="toggle-password"> Show Password</label>
-      <button id="copy-btn">📋 Copy</button>
+        <!-- GAMIFIED MODE QUESTION BOX -->
+        <div id="challengeBox">
+            <div id="challengeText"></div>
+            <input type="text" id="challengeAnswer" placeholder="Your answer..." />
+        </div>
+
+        <!-- SUBMIT BUTTON -->
+        <button id="submitBtn">Check Password</button>
+
+        <!-- RESULT -->
+        <div id="result"></div>
+
+        <!-- LOFI PLAYER -->
+        <div id="lofiPlayer">
+            <h3>Lofi Background Music</h3>
+            <div class="lofi-controls">
+                <button id="playPause">Pause</button>
+                <input type="range" id="volume" min="0" max="1" step="0.01" />
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">© 2025 Password Trainer UI</div>
+
     </div>
 
-    <div id="strength-text">Strength:</div>
-    <div class="progress-bar"><div id="progress-fill"></div></div>
+    <!-- Script -->
+    <script src="script.js"></script>
 
-    <ul id="requirements"></ul>
-
-    <h2>Password Generator</h2>
-    <button id="open-generator-btn">🎲 Generate Password</button>
-
-    <!-- Modal -->
-    <div id="generator-modal" class="modal">
-      <div class="modal-content">
-        <span class="close">&times;</span>
-        <h3>Customize Password</h3>
-
-        <label>Length: <span id="length-value">12</span></label>
-        <input type="range" id="length-slider" min="8" max="32" value="12">
-
-        <label>Numbers: <span id="number-value">2</span></label>
-        <input type="range" id="number-slider" min="0" max="10" value="2">
-
-        <label>Special Characters: <span id="special-value">2</span></label>
-        <input type="range" id="special-slider" min="0" max="10" value="2">
-
-        <button id="generate-btn">✅ Generate</button>
-      </div>
-    </div>
-
-    <h2>Gamify Your Password</h2>
-    <button id="start-game-btn">🎮 Start Game Mode</button>
-
-    <audio id="game-music" loop>
-      <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
-    </audio>
-
-    <div id="game-area" style="display:none;">
-      <p id="game-question"></p>
-      <input type="text" id="game-answer" placeholder="Type answer here">
-      <button id="submit-answer-btn">Submit</button>
-    </div>
-  </div>
-
-  <script src="script.js"></script>
 </body>
 </html>
