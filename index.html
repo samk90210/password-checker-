@@ -1,65 +1,134 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Password Trainer</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Password Trainer — Checker & Gamified Mode</title>
 
-    <!-- Stylesheet -->
-    <link rel="stylesheet" href="style.css" />
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css" />
 
-    <!-- Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
-
 <body>
 
-    <div class="container">
-        
-        <!-- HEADER -->
-        <div class="header-row">
-            <h1>Password Trainer</h1>
-            <button id="themeToggle">Toggle Theme</button>
-        </div>
+  <!-- SETTINGS BUTTON (top-right) -->
+  <button id="settingsBtn" aria-label="Open settings">⚙️</button>
 
-        <!-- MODE SELECTOR -->
-        <label for="modeSelect">Choose Mode:</label>
-        <select id="modeSelect">
-            <option value="normal">Normal Password Check</option>
-            <option value="gamified">Gamified Mode (Challenges)</option>
-        </select>
-
-        <!-- PASSWORD INPUT -->
-        <input type="password" id="passwordInput" placeholder="Enter your password..." />
-
-        <!-- GAMIFIED MODE QUESTION BOX -->
-        <div id="challengeBox">
-            <div id="challengeText"></div>
-            <input type="text" id="challengeAnswer" placeholder="Your answer..." />
-        </div>
-
-        <!-- SUBMIT BUTTON -->
-        <button id="submitBtn">Check Password</button>
-
-        <!-- RESULT -->
-        <div id="result"></div>
-
-        <!-- LOFI PLAYER -->
-        <div id="lofiPlayer">
-            <h3>Lofi Background Music</h3>
-            <div class="lofi-controls">
-                <button id="playPause">Pause</button>
-                <input type="range" id="volume" min="0" max="1" step="0.01" />
-            </div>
-        </div>
-
-        <!-- FOOTER -->
-        <div class="footer">© 2025 Password Trainer UI</div>
-
+  <!-- SETTINGS PANEL (slide-out) -->
+  <aside id="settingsPanel" aria-hidden="true">
+    <div class="settings-header">
+      <h3>Settings</h3>
+      <button id="closeSettings" aria-label="Close settings">✕</button>
     </div>
 
-    <!-- Script -->
-    <script src="script.js"></script>
+    <div class="setting-row">
+      <div class="label">Theme</div>
+      <button id="themeToggle" class="pill">Toggle Light / Dark</button>
+    </div>
 
+    <div class="setting-row">
+      <div class="label">Music</div>
+      <div class="music-controls">
+        <button id="playPauseBtn" class="pill">⏸ Pause</button>
+        <input id="volumeSlider" type="range" min="0" max="1" step="0.01" />
+      </div>
+      <div class="small-note">Autoplay is muted by default (browser rules).</div>
+    </div>
+
+    <div class="setting-row">
+      <div class="label">Extras</div>
+      <button id="openGeneratorSmall" class="pill">Open Generator</button>
+    </div>
+  </aside>
+
+  <!-- INVISIBLE YouTube iframe holder for lofi -->
+  <div id="yt-holder" aria-hidden="true"></div>
+
+  <!-- MAIN CONTENT (centered) -->
+  <main class="main-card" id="mainCard">
+    <header class="top">
+      <h1>Password Checker</h1>
+      <p class="subtitle">Make strong passwords. Check strength in real time.</p>
+    </header>
+
+    <!-- Mode pills -->
+    <div class="mode-row" role="tablist" aria-label="Modes">
+      <button id="modePassword" class="mode-pill active" role="tab" aria-selected="true">Password Mode</button>
+      <button id="modeGamified" class="mode-pill" role="tab" aria-selected="false">Gamified Mode</button>
+    </div>
+
+    <!-- Big password input -->
+    <div class="input-wrap">
+      <input id="password" type="password" placeholder="Enter your password" autocomplete="new-password" />
+      <label class="toggle-inline"><input id="toggle-password" type="checkbox"> Show</label>
+    </div>
+
+    <!-- Copy / Generate small row -->
+    <div class="row small-row">
+      <button id="copy-btn" class="secondary">📋 Copy</button>
+      <button id="open-generator-btn" class="secondary">🎲 Generator</button>
+    </div>
+
+    <!-- Strength / progress -->
+    <div id="strength-text" class="strength">Strength: —</div>
+    <div class="progress-bar" aria-hidden="true"><div id="progress-fill"></div></div>
+
+    <!-- Requirements -->
+    <ul id="requirements" class="requirements"></ul>
+  </main>
+
+  <!-- GAMIFIED FULLSCREEN PANEL (slides in from right) -->
+  <section id="gamePanel" aria-hidden="true">
+    <div class="game-header">
+      <button id="closeGame" class="ghost">← Back</button>
+      <h2>Gamified Password Builder</h2>
+    </div>
+
+    <div class="game-center">
+      <div id="gameProgress" class="game-progress">Step 1 / 5</div>
+      <div id="gameQuestion" class="game-question">Question appears here</div>
+
+      <input id="gameAnswer" type="text" placeholder="Type your answer" />
+      <div class="row">
+        <button id="submit-answer-btn" class="primary">Submit</button>
+        <button id="skip-btn" class="ghost">Skip</button>
+      </div>
+
+      <div id="gameMessage" class="game-message" role="status" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- GENERATOR MODAL -->
+  <div id="generator-modal" class="modal" aria-hidden="true">
+    <div class="modal-content">
+      <button class="close" id="generator-close">✕</button>
+      <h3>Customize Password</h3>
+
+      <label class="range-row">Length: <span id="length-value">12</span>
+        <input id="length-slider" type="range" min="8" max="32" value="12">
+      </label>
+
+      <label class="range-row">Numbers: <span id="number-value">2</span>
+        <input id="number-slider" type="range" min="0" max="10" value="2">
+      </label>
+
+      <label class="range-row">Specials: <span id="special-value">2</span>
+        <input id="special-slider" type="range" min="0" max="10" value="2">
+      </label>
+
+      <div class="row">
+        <button id="generate-btn" class="primary">Generate</button>
+        <button id="generator-cancel" class="ghost">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- small invisible audio fallback (not used if YT works) -->
+  <audio id="fallbackAudio" loop style="display:none"></audio>
+
+  <!-- Script -->
+  <script src="script.js"></script>
 </body>
 </html>
