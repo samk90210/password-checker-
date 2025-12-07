@@ -6,31 +6,33 @@
   <title>Password Game & Checker</title>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
+  <!-- Background Music -->
+  <audio id="bg-music" loop autoplay>
+    <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_f8e9079b94.mp3?filename=lofi-study-112191.mp3" type="audio/mpeg">
+  </audio>
+
+  <div class="music-controls">
+    <button id="music-toggle">⏸ Pause</button>
+    <input type="range" id="music-volume" min="0" max="1" step="0.01" value="0.5">
+  </div>
+
   <div class="container">
     <h1>Password Checker</h1>
 
-    <!-- Main Input -->
     <input type="password" id="password" placeholder="Enter your password">
-    
-    <!-- Controls -->
+
     <div class="controls">
-      <label>
-        <input type="checkbox" id="toggle-password"> Show Password
-      </label>
+      <label><input type="checkbox" id="toggle-password"> Show Password</label>
       <button id="copy-btn">📋 Copy</button>
     </div>
 
-    <!-- Strength Indicator -->
-    <div id="strength-text">Strength: </div>
-    <div class="progress-bar">
-      <div id="progress-fill"></div>
-    </div>
+    <div id="strength-text">Strength:</div>
+    <div class="progress-bar"><div id="progress-fill"></div></div>
 
-    <!-- Requirements -->
     <ul id="requirements"></ul>
 
-    <!-- Password Generator -->
     <h2>Password Generator</h2>
     <button id="open-generator-btn">🎲 Generate Password</button>
 
@@ -42,10 +44,10 @@
 
         <label>Length: <span id="length-value">12</span></label>
         <input type="range" id="length-slider" min="8" max="32" value="12">
-        
+
         <label>Numbers: <span id="number-value">2</span></label>
         <input type="range" id="number-slider" min="0" max="10" value="2">
-        
+
         <label>Special Characters: <span id="special-value">2</span></label>
         <input type="range" id="special-slider" min="0" max="10" value="2">
 
@@ -53,12 +55,13 @@
       </div>
     </div>
 
-    <!-- Gamify -->
     <h2>Gamify Your Password</h2>
     <button id="start-game-btn">🎮 Start Game Mode</button>
+
     <audio id="game-music" loop>
       <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
     </audio>
+
     <div id="game-area" style="display:none;">
       <p id="game-question"></p>
       <input type="text" id="game-answer" placeholder="Type answer here">
