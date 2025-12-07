@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Password Trainer — Checker & Gamified Mode</title>
+
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
@@ -21,7 +22,10 @@
 
     <div class="setting-row">
       <div class="label">Theme</div>
-      <button id="themeToggle" class="pill">Toggle Light / Dark</button>
+      <button id="themeToggle" class="theme-toggle" aria-pressed="false">
+        <span id="themeIcon" class="theme-icon">☀️</span>
+      </button>
+      <div class="small-note">Tap the sun / moon to switch. Smooth day ↔ night animation.</div>
     </div>
 
     <div class="setting-row">
@@ -53,11 +57,11 @@
   <!-- INVISIBLE YouTube iframe holder for lofi -->
   <div id="yt-holder" aria-hidden="true"></div>
 
-  <!-- MAIN CONTENT -->
+  <!-- CENTERED CARD (MAIN) -->
   <main class="main-card" id="mainCard">
     <header class="top">
       <h1>Password Checker</h1>
-      <p class="subtitle">Real-time strength, entropy & time-to-crack estimates.</p>
+      <p class="subtitle">Real-time strength, password complexity & estimated time to break.</p>
     </header>
 
     <!-- Mode pills -->
@@ -72,7 +76,7 @@
       <label class="toggle-inline"><input id="toggle-password" type="checkbox"> Show</label>
     </div>
 
-    <!-- Copy / Generate small row -->
+    <!-- Copy / Generate / Save row -->
     <div class="row small-row">
       <button id="copy-btn" class="secondary">📋 Copy</button>
       <button id="open-generator-btn" class="secondary">🎲 Generator</button>
@@ -81,16 +85,17 @@
 
     <!-- Strength / progress -->
     <div id="strength-text" class="strength">Strength: —</div>
+
     <div class="progress-row">
       <div class="progress-bar" aria-hidden="true"><div id="progress-fill"></div></div>
-      <div id="entropy" class="entropy">Entropy: — bits</div>
+      <div id="complexity" class="complexity">Password Complexity: — bits</div>
     </div>
 
-    <!-- Time-to-crack estimates -->
+    <!-- Time-to-break estimates -->
     <div class="ttc">
-      <div class="ttc-row"><div>Online (1e3 guesses/s):</div><div id="ttc-1e3">—</div></div>
-      <div class="ttc-row"><div>Offline GPU (1e9 guesses/s):</div><div id="ttc-1e9">—</div></div>
-      <div class="ttc-row"><div>Powerful (1e12 guesses/s):</div><div id="ttc-1e12">—</div></div>
+      <div class="ttc-row"><div>Online (1,000 guesses/s):</div><div id="ttc-1e3">—</div></div>
+      <div class="ttc-row"><div>Offline (1,000,000,000 guesses/s):</div><div id="ttc-1e9">—</div></div>
+      <div class="ttc-row"><div>Power cluster (1,000,000,000,000 guesses/s):</div><div id="ttc-1e12">—</div></div>
     </div>
 
     <!-- Requirements -->
@@ -143,7 +148,7 @@
     </div>
   </div>
 
-  <!-- HISTORY PANEL (modal) -->
+  <!-- HISTORY MODAL -->
   <div id="history-modal" class="modal" aria-hidden="true">
     <div class="modal-content">
       <button class="close" id="history-close">✕</button>
@@ -159,10 +164,9 @@
     </div>
   </div>
 
-  <!-- small invisible audio fallback (not used if YT works) -->
   <audio id="fallbackAudio" loop style="display:none"></audio>
 
-  <!-- Script -->
   <script src="script.js"></script>
 </body>
 </html>
+
