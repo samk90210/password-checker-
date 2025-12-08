@@ -10,9 +10,10 @@
 </head>
 <body>
 
-  <!-- Floating settings -->
+  <!-- SETTINGS BUTTON (top-right) -->
   <button id="settingsBtn" aria-label="Open settings">⚙️</button>
 
+  <!-- SETTINGS PANEL -->
   <aside id="settingsPanel" aria-hidden="true">
     <div class="settings-header">
       <h3>Settings</h3>
@@ -21,45 +22,43 @@
 
     <div class="setting-row">
       <div class="label">Theme</div>
-      <div class="control-row">
-        <button id="themeToggle" class="emoji-toggle" aria-pressed="false" title="Toggle theme">
-          <span id="themeIcon">☀️</span>
-        </button>
-      </div>
-      <div class="small-note">Tap the sun or moon to switch. Smooth day ↔ night animation.</div>
+      <button id="themeToggle" class="theme-toggle" aria-pressed="false" title="Toggle theme">
+        <span id="themeIcon" class="theme-icon">☀️</span>
+      </button>
+      <div class="small-note">Tap the sun / moon to switch. Smooth day ↔ night animation.</div>
     </div>
 
     <div class="setting-row">
       <div class="label">Music</div>
-      <div class="control-row">
-        <button id="playPauseBtn" class="emoji-toggle" title="Play / Pause music">⏸️</button>
+      <div class="music-controls">
+        <button id="musicBtn" class="pill" title="Play / Pause music">🎵</button>
         <input id="volumeSlider" type="range" min="0" max="1" step="0.01" />
       </div>
-      <div class="small-note">Autoplay starts muted (browser rules). Use controls to unmute.</div>
+      <div class="small-note">Autoplay starts muted (browser rules). Increase volume to unmute.</div>
     </div>
 
     <div class="setting-row">
       <div class="label">History & Export</div>
       <div class="row" style="gap:8px;">
-        <button id="openHistory" class="pill">View</button>
-        <button id="exportHistory" class="pill">Export</button>
+        <button id="openHistory" class="pill">View History</button>
+        <button id="exportHistory" class="pill">Export JSON</button>
       </div>
       <div style="margin-top:8px;font-size:12px;color:#888;">
-        Warning: saved passwords are stored locally in your browser. Exported files are plaintext.
+        Warning: Saved passwords are stored locally in your browser. Exported files are plaintext.
       </div>
     </div>
 
     <div class="setting-row">
       <div class="label">Quick Generator</div>
-      <button id="openGeneratorSmall" class="pill">Generator</button>
+      <button id="openGeneratorSmall" class="pill">Open Generator</button>
     </div>
   </aside>
 
-  <!-- YouTube holder for lofi iframe -->
+  <!-- invisible YT holder for lofi -->
   <div id="yt-holder" aria-hidden="true"></div>
 
-  <!-- Centered card -->
-  <main class="main-card" id="mainCard">
+  <!-- centered main card -->
+  <main class="main-card" id="mainCard" role="main">
     <header class="top">
       <h1>Password Checker</h1>
       <p class="subtitle">Real-time strength, password complexity & estimated crack time.</p>
@@ -81,23 +80,23 @@
       <button id="saveHistoryBtn" class="secondary">💾 Save</button>
     </div>
 
-    <div id="strength-text" class="strength">Strength: —</div>
+    <div id="strength-text" class="strength">Password strength level: —</div>
 
     <div class="progress-row">
-      <div class="progress-bar"><div id="progress-fill"></div></div>
+      <div class="progress-bar" aria-hidden="true"><div id="progress-fill"></div></div>
       <div id="complexity" class="complexity">Password complexity: — bits</div>
     </div>
 
     <div class="ttc">
-      <div class="ttc-row"><div>Online (1,000 guesses/s):</div><div id="ttc-1e3">—</div></div>
-      <div class="ttc-row"><div>Offline (1,000,000,000 guesses/s):</div><div id="ttc-1e9">—</div></div>
-      <div class="ttc-row"><div>Power cluster (1,000,000,000,000 guesses/s):</div><div id="ttc-1e12">—</div></div>
+      <div class="ttc-row"><div>Estimated crack time — Online (1,000 guesses/s):</div><div id="ttc-1e3">—</div></div>
+      <div class="ttc-row"><div>Estimated crack time — Offline (1,000,000,000 guesses/s):</div><div id="ttc-1e9">—</div></div>
+      <div class="ttc-row"><div>Estimated crack time — Cluster (1,000,000,000,000 guesses/s):</div><div id="ttc-1e12">—</div></div>
     </div>
 
     <ul id="requirements" class="requirements"></ul>
   </main>
 
-  <!-- Gamified fullscreen panel -->
+  <!-- gamified full-screen panel -->
   <section id="gamePanel" aria-hidden="true">
     <div class="game-header">
       <button id="closeGame" class="ghost">← Back</button>
@@ -118,7 +117,7 @@
     </div>
   </section>
 
-  <!-- Generator modal -->
+  <!-- generator modal -->
   <div id="generator-modal" class="modal" aria-hidden="true">
     <div class="modal-content">
       <button class="close" id="generator-close">✕</button>
@@ -143,7 +142,7 @@
     </div>
   </div>
 
-  <!-- History modal -->
+  <!-- history modal -->
   <div id="history-modal" class="modal" aria-hidden="true">
     <div class="modal-content">
       <button class="close" id="history-close">✕</button>
@@ -160,7 +159,6 @@
   </div>
 
   <audio id="fallbackAudio" loop style="display:none"></audio>
-
   <script src="script.js"></script>
 </body>
 </html>
