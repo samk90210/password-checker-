@@ -10,10 +10,9 @@
 </head>
 <body>
 
-  <!-- SETTINGS BUTTON (top-right) -->
+  <!-- Floating settings -->
   <button id="settingsBtn" aria-label="Open settings">⚙️</button>
 
-  <!-- SETTINGS PANEL (slide-out) -->
   <aside id="settingsPanel" aria-hidden="true">
     <div class="settings-header">
       <h3>Settings</h3>
@@ -22,87 +21,83 @@
 
     <div class="setting-row">
       <div class="label">Theme</div>
-      <button id="themeToggle" class="theme-toggle" aria-pressed="false">
-        <span id="themeIcon" class="theme-icon">☀️</span>
-      </button>
-      <div class="small-note">Tap the sun / moon to switch. Smooth day ↔ night animation.</div>
+      <div class="control-row">
+        <button id="themeToggle" class="emoji-toggle" aria-pressed="false" title="Toggle theme">
+          <span id="themeIcon">☀️</span>
+        </button>
+      </div>
+      <div class="small-note">Tap the sun or moon to switch. Smooth day ↔ night animation.</div>
     </div>
 
     <div class="setting-row">
       <div class="label">Music</div>
-      <div class="music-controls">
-        <button id="playPauseBtn" class="pill">⏸ Pause</button>
+      <div class="control-row">
+        <button id="playPauseBtn" class="emoji-toggle" title="Play / Pause music">⏸️</button>
         <input id="volumeSlider" type="range" min="0" max="1" step="0.01" />
       </div>
-      <div class="small-note">Autoplay is muted by default (browser rules).</div>
+      <div class="small-note">Autoplay starts muted (browser rules). Use controls to unmute.</div>
     </div>
 
     <div class="setting-row">
       <div class="label">History & Export</div>
       <div class="row" style="gap:8px;">
-        <button id="openHistory" class="pill">View History</button>
-        <button id="exportHistory" class="pill">Export JSON</button>
+        <button id="openHistory" class="pill">View</button>
+        <button id="exportHistory" class="pill">Export</button>
       </div>
       <div style="margin-top:8px;font-size:12px;color:#888;">
-        Warning: Saved passwords are stored locally in your browser. Exported files are plaintext.
+        Warning: saved passwords are stored locally in your browser. Exported files are plaintext.
       </div>
     </div>
 
     <div class="setting-row">
       <div class="label">Quick Generator</div>
-      <button id="openGeneratorSmall" class="pill">Open Generator</button>
+      <button id="openGeneratorSmall" class="pill">Generator</button>
     </div>
   </aside>
 
-  <!-- INVISIBLE YouTube iframe holder for lofi -->
+  <!-- YouTube holder for lofi iframe -->
   <div id="yt-holder" aria-hidden="true"></div>
 
-  <!-- CENTERED CARD (MAIN) -->
+  <!-- Centered card -->
   <main class="main-card" id="mainCard">
     <header class="top">
       <h1>Password Checker</h1>
-      <p class="subtitle">Real-time strength, password complexity & estimated time to break.</p>
+      <p class="subtitle">Real-time strength, password complexity & estimated crack time.</p>
     </header>
 
-    <!-- Mode pills -->
     <div class="mode-row" role="tablist" aria-label="Modes">
       <button id="modePassword" class="mode-pill active" role="tab" aria-selected="true">Password Mode</button>
       <button id="modeGamified" class="mode-pill" role="tab" aria-selected="false">Gamified Mode</button>
     </div>
 
-    <!-- Big password input -->
     <div class="input-wrap">
       <input id="password" type="password" placeholder="Enter your password" autocomplete="new-password" />
       <label class="toggle-inline"><input id="toggle-password" type="checkbox"> Show</label>
     </div>
 
-    <!-- Copy / Generate / Save row -->
     <div class="row small-row">
       <button id="copy-btn" class="secondary">📋 Copy</button>
       <button id="open-generator-btn" class="secondary">🎲 Generator</button>
       <button id="saveHistoryBtn" class="secondary">💾 Save</button>
     </div>
 
-    <!-- Strength / progress -->
     <div id="strength-text" class="strength">Strength: —</div>
 
     <div class="progress-row">
-      <div class="progress-bar" aria-hidden="true"><div id="progress-fill"></div></div>
-      <div id="complexity" class="complexity">Password Complexity: — bits</div>
+      <div class="progress-bar"><div id="progress-fill"></div></div>
+      <div id="complexity" class="complexity">Password complexity: — bits</div>
     </div>
 
-    <!-- Time-to-break estimates -->
     <div class="ttc">
       <div class="ttc-row"><div>Online (1,000 guesses/s):</div><div id="ttc-1e3">—</div></div>
       <div class="ttc-row"><div>Offline (1,000,000,000 guesses/s):</div><div id="ttc-1e9">—</div></div>
       <div class="ttc-row"><div>Power cluster (1,000,000,000,000 guesses/s):</div><div id="ttc-1e12">—</div></div>
     </div>
 
-    <!-- Requirements -->
     <ul id="requirements" class="requirements"></ul>
   </main>
 
-  <!-- GAMIFIED FULLSCREEN PANEL (slides in from right) -->
+  <!-- Gamified fullscreen panel -->
   <section id="gamePanel" aria-hidden="true">
     <div class="game-header">
       <button id="closeGame" class="ghost">← Back</button>
@@ -123,7 +118,7 @@
     </div>
   </section>
 
-  <!-- GENERATOR MODAL -->
+  <!-- Generator modal -->
   <div id="generator-modal" class="modal" aria-hidden="true">
     <div class="modal-content">
       <button class="close" id="generator-close">✕</button>
@@ -148,7 +143,7 @@
     </div>
   </div>
 
-  <!-- HISTORY MODAL -->
+  <!-- History modal -->
   <div id="history-modal" class="modal" aria-hidden="true">
     <div class="modal-content">
       <button class="close" id="history-close">✕</button>
