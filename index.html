@@ -1,11 +1,9 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-
 <head>
 
-<meta charset="utf-8">
-
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Password Trainer</title>
 
@@ -19,21 +17,7 @@
 
 <button id="settingsBtn">⚙️</button>
 
-<aside id="settingsPanel">
-
-<button id="closeSettings">✕</button>
-
-<button id="themeToggle">
-
-<span id="themeIcon">☀️</span>
-
-</button>
-
-</aside>
-
-<div id="yt-holder"></div>
-
-<main class="main-card">
+<div class="main-card">
 
 <h1>Password Checker</h1>
 
@@ -47,29 +31,27 @@
 
 <div class="input-wrap">
 
-<input id="password" type="password" placeholder="Enter password">
+<input id="password" type="password" placeholder="Enter your password">
 
-<label>
+<label class="toggle-inline">
 
-<input id="toggle-password" type="checkbox">
-
-Show
+<input id="toggle-password" type="checkbox"> Show
 
 </label>
 
 </div>
 
-<div>
+<div class="small-row">
 
-<button id="copy-btn">Copy</button>
+<button id="copy-btn">📋 Copy</button>
 
-<button id="open-generator-btn">Generator</button>
+<button id="open-generator-btn">🎲 Generator</button>
 
-<button id="saveHistoryBtn">Save</button>
+<button id="saveHistoryBtn">💾 Save</button>
 
 </div>
 
-<div id="strength-text"></div>
+<div id="strength-text">Password strength level: —</div>
 
 <div class="progress-bar">
 
@@ -77,79 +59,45 @@ Show
 
 </div>
 
-<div id="complexity"></div>
+<div id="complexity">Password complexity: —</div>
 
 <div class="ttc">
 
-<div>Online: <span id="ttc-1e3"></span></div>
+<div>Online attack: <span id="ttc-1e3"></span></div>
 
-<div>Offline: <span id="ttc-1e9"></span></div>
+<div>Offline attack: <span id="ttc-1e9"></span></div>
 
-<div>Cluster: <span id="ttc-1e12"></span></div>
+<div>Cluster attack: <span id="ttc-1e12"></span></div>
 
 </div>
 
-<ul id="requirements"></ul>
-
-</main>
-
-<section id="gamePanel">
-
-<button id="closeGame">Back</button>
-
-<h2>Password Game</h2>
-
-<div id="gameProgress"></div>
-
-<div id="gameQuestion"></div>
-
-<input id="gameAnswer">
-
-<button id="submit-answer-btn">Submit</button>
-
-<button id="skip-btn">Skip</button>
-
-<div id="gameMessage"></div>
-
-</section>
+</div>
 
 <div id="generator-modal" class="modal">
 
 <div class="modal-content">
 
-<button id="generator-close">✕</button>
-
 <h3>Password Generator</h3>
 
 <label>
-
 Length
-
 <input id="length-slider" type="range" min="8" max="32" value="12">
-
-<span id="length-value"></span>
-
+<span id="length-value">12</span>
 </label>
 
 <label>
-
 Numbers
-
 <input id="number-slider" type="range" min="0" max="10" value="2">
-
-<span id="number-value"></span>
-
+<span id="number-value">2</span>
 </label>
 
 <label>
-
-Special
-
+Specials
 <input id="special-slider" type="range" min="0" max="10" value="2">
-
-<span id="special-value"></span>
-
+<span id="special-value">2</span>
 </label>
+
+<div class="row">
 
 <button id="generate-btn">Generate</button>
 
@@ -159,24 +107,9 @@ Special
 
 </div>
 
-<div id="history-modal" class="modal">
-
-<div class="modal-content">
-
-<button id="history-close">✕</button>
-
-<div id="history-list"></div>
-
-<button id="clearHistory">Clear</button>
-
-<button id="downloadHistory">Download</button>
-
-</div>
-
 </div>
 
 <script src="script.js"></script>
 
 </body>
-
 </html>
