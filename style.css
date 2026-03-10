@@ -119,3 +119,56 @@ width:400px;
 body.dark .modal-content{
 background:#111;
 }
+
+/* Fix button icon alignment */
+button {
+display: inline-flex;
+align-items: center;
+justify-content: center;
+gap: 6px;
+}
+
+.secondary,
+.primary,
+.ghost {
+display: inline-flex;
+align-items: center;
+justify-content: center;
+gap: 6px;
+}
+
+/* Fix row layout */
+.row {
+display: flex;
+align-items: center;
+gap: 10px;
+flex-wrap: wrap;
+}
+
+/* Fix generator modal buttons */
+.modal-content .row {
+justify-content: flex-end;
+}
+
+/* Fix small button row under password */
+.small-row {
+display: flex;
+align-items: center;
+justify-content: flex-end;
+gap: 10px;
+}
+
+/* Settings button icon centering */
+#settingsBtn {
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 22px;
+}
+
+/* Theme icon centered */
+.theme-icon {
+display: flex;
+align-items: center;
+justify-content: center;
+}
