@@ -1,165 +1,182 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Password Trainer — Checker & Gamified Mode</title>
 
-  <link rel="stylesheet" href="style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<head>
+
+<meta charset="utf-8">
+
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Password Trainer</title>
+
+<link rel="stylesheet" href="style.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
 </head>
+
 <body>
 
-  <!-- SETTINGS BUTTON (top-right) -->
-  <button id="settingsBtn" aria-label="Open settings">⚙️</button>
+<button id="settingsBtn">⚙️</button>
 
-  <!-- SETTINGS PANEL -->
-  <aside id="settingsPanel" aria-hidden="true">
-    <div class="settings-header">
-      <h3>Settings</h3>
-      <button id="closeSettings" aria-label="Close settings">✕</button>
-    </div>
+<aside id="settingsPanel">
 
-    <div class="setting-row">
-      <div class="label">Theme</div>
-      <button id="themeToggle" class="theme-toggle" aria-pressed="false" title="Toggle theme">
-        <span id="themeIcon" class="theme-icon">☀️</span>
-      </button>
-      <div class="small-note">Tap the sun / moon to switch. Smooth day ↔ night animation.</div>
-    </div>
+<button id="closeSettings">✕</button>
 
-    <div class="setting-row">
-      <div class="label">Music</div>
-      <div class="music-controls">
-        <button id="musicBtn" class="pill" title="Play / Pause music">🎵</button>
-        <input id="volumeSlider" type="range" min="0" max="1" step="0.01" />
-      </div>
-      <div class="small-note">Autoplay starts muted (browser rules). Increase volume to unmute.</div>
-    </div>
+<button id="themeToggle">
 
-    <div class="setting-row">
-      <div class="label">History & Export</div>
-      <div class="row" style="gap:8px;">
-        <button id="openHistory" class="pill">View History</button>
-        <button id="exportHistory" class="pill">Export JSON</button>
-      </div>
-      <div style="margin-top:8px;font-size:12px;color:#888;">
-        Warning: Saved passwords are stored locally in your browser. Exported files are plaintext.
-      </div>
-    </div>
+<span id="themeIcon">☀️</span>
 
-    <div class="setting-row">
-      <div class="label">Quick Generator</div>
-      <button id="openGeneratorSmall" class="pill">Open Generator</button>
-    </div>
-  </aside>
+</button>
 
-  <!-- invisible YT holder for lofi -->
-  <div id="yt-holder" aria-hidden="true"></div>
+</aside>
 
-  <!-- centered main card -->
-  <main class="main-card" id="mainCard" role="main">
-    <header class="top">
-      <h1>Password Checker</h1>
-      <p class="subtitle">Real-time strength, password complexity & estimated crack time.</p>
-    </header>
+<div id="yt-holder"></div>
 
-    <div class="mode-row" role="tablist" aria-label="Modes">
-      <button id="modePassword" class="mode-pill active" role="tab" aria-selected="true">Password Mode</button>
-      <button id="modeGamified" class="mode-pill" role="tab" aria-selected="false">Gamified Mode</button>
-    </div>
+<main class="main-card">
 
-    <div class="input-wrap">
-      <input id="password" type="password" placeholder="Enter your password" autocomplete="new-password" />
-      <label class="toggle-inline"><input id="toggle-password" type="checkbox"> Show</label>
-    </div>
+<h1>Password Checker</h1>
 
-    <div class="row small-row">
-      <button id="copy-btn" class="secondary">📋 Copy</button>
-      <button id="open-generator-btn" class="secondary">🎲 Generator</button>
-      <button id="saveHistoryBtn" class="secondary">💾 Save</button>
-    </div>
+<div class="mode-row">
 
-    <div id="strength-text" class="strength">Password strength level: —</div>
+<button id="modePassword" class="mode-pill active">Password Mode</button>
 
-    <div class="progress-row">
-      <div class="progress-bar" aria-hidden="true"><div id="progress-fill"></div></div>
-      <div id="complexity" class="complexity">Password complexity: — bits</div>
-    </div>
+<button id="modeGamified" class="mode-pill">Gamified Mode</button>
 
-    <div class="ttc">
-      <div class="ttc-row"><div>Estimated crack time — Online (1,000 guesses/s):</div><div id="ttc-1e3">—</div></div>
-      <div class="ttc-row"><div>Estimated crack time — Offline (1,000,000,000 guesses/s):</div><div id="ttc-1e9">—</div></div>
-      <div class="ttc-row"><div>Estimated crack time — Cluster (1,000,000,000,000 guesses/s):</div><div id="ttc-1e12">—</div></div>
-    </div>
+</div>
 
-    <ul id="requirements" class="requirements"></ul>
-  </main>
+<div class="input-wrap">
 
-  <!-- gamified full-screen panel -->
-  <section id="gamePanel" aria-hidden="true">
-    <div class="game-header">
-      <button id="closeGame" class="ghost">← Back</button>
-      <h2>Gamified Password Builder</h2>
-    </div>
+<input id="password" type="password" placeholder="Enter password">
 
-    <div class="game-center">
-      <div id="gameProgress" class="game-progress">Step 1 / 5</div>
-      <div id="gameQuestion" class="game-question">Question appears here</div>
+<label>
 
-      <input id="gameAnswer" type="text" placeholder="Type your answer" />
-      <div class="row">
-        <button id="submit-answer-btn" class="primary">Submit</button>
-        <button id="skip-btn" class="ghost">Skip</button>
-      </div>
+<input id="toggle-password" type="checkbox">
 
-      <div id="gameMessage" class="game-message" role="status" aria-live="polite"></div>
-    </div>
-  </section>
+Show
 
-  <!-- generator modal -->
-  <div id="generator-modal" class="modal" aria-hidden="true">
-    <div class="modal-content">
-      <button class="close" id="generator-close">✕</button>
-      <h3>Customize Password</h3>
+</label>
 
-      <label class="range-row">Length: <span id="length-value">12</span>
-        <input id="length-slider" type="range" min="8" max="32" value="12">
-      </label>
+</div>
 
-      <label class="range-row">Numbers: <span id="number-value">2</span>
-        <input id="number-slider" type="range" min="0" max="10" value="2">
-      </label>
+<div>
 
-      <label class="range-row">Specials: <span id="special-value">2</span>
-        <input id="special-slider" type="range" min="0" max="10" value="2">
-      </label>
+<button id="copy-btn">Copy</button>
 
-      <div class="row">
-        <button id="generate-btn" class="primary">Generate</button>
-        <button id="generator-cancel" class="ghost">Cancel</button>
-      </div>
-    </div>
-  </div>
+<button id="open-generator-btn">Generator</button>
 
-  <!-- history modal -->
-  <div id="history-modal" class="modal" aria-hidden="true">
-    <div class="modal-content">
-      <button class="close" id="history-close">✕</button>
-      <h3>Saved Passwords (local)</h3>
-      <div style="font-size:12px;color:#777;margin-bottom:8px;">
-        This history is saved locally in your browser. Do not save real passwords here.
-      </div>
-      <div id="history-list" style="max-height:320px;overflow:auto;"></div>
-      <div class="row" style="margin-top:12px;">
-        <button id="clearHistory" class="ghost">Clear</button>
-        <button id="downloadHistory" class="primary">Download JSON</button>
-      </div>
-    </div>
-  </div>
+<button id="saveHistoryBtn">Save</button>
 
-  <audio id="fallbackAudio" loop style="display:none"></audio>
-  <script src="script.js"></script>
+</div>
+
+<div id="strength-text"></div>
+
+<div class="progress-bar">
+
+<div id="progress-fill"></div>
+
+</div>
+
+<div id="complexity"></div>
+
+<div class="ttc">
+
+<div>Online: <span id="ttc-1e3"></span></div>
+
+<div>Offline: <span id="ttc-1e9"></span></div>
+
+<div>Cluster: <span id="ttc-1e12"></span></div>
+
+</div>
+
+<ul id="requirements"></ul>
+
+</main>
+
+<section id="gamePanel">
+
+<button id="closeGame">Back</button>
+
+<h2>Password Game</h2>
+
+<div id="gameProgress"></div>
+
+<div id="gameQuestion"></div>
+
+<input id="gameAnswer">
+
+<button id="submit-answer-btn">Submit</button>
+
+<button id="skip-btn">Skip</button>
+
+<div id="gameMessage"></div>
+
+</section>
+
+<div id="generator-modal" class="modal">
+
+<div class="modal-content">
+
+<button id="generator-close">✕</button>
+
+<h3>Password Generator</h3>
+
+<label>
+
+Length
+
+<input id="length-slider" type="range" min="8" max="32" value="12">
+
+<span id="length-value"></span>
+
+</label>
+
+<label>
+
+Numbers
+
+<input id="number-slider" type="range" min="0" max="10" value="2">
+
+<span id="number-value"></span>
+
+</label>
+
+<label>
+
+Special
+
+<input id="special-slider" type="range" min="0" max="10" value="2">
+
+<span id="special-value"></span>
+
+</label>
+
+<button id="generate-btn">Generate</button>
+
+<button id="generator-cancel">Cancel</button>
+
+</div>
+
+</div>
+
+<div id="history-modal" class="modal">
+
+<div class="modal-content">
+
+<button id="history-close">✕</button>
+
+<div id="history-list"></div>
+
+<button id="clearHistory">Clear</button>
+
+<button id="downloadHistory">Download</button>
+
+</div>
+
+</div>
+
+<script src="script.js"></script>
+
 </body>
-</html>
 
+</html>
