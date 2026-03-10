@@ -1,359 +1,190 @@
-/* script.js */
+const passwordInput = document.getElementById("password")
 
-const YT_VIDEO_ID = "8b3fqIBrNW0";
+const strengthText = document.getElementById("strength-text")
 
-const MUSIC_KEY = "pw_music_v4";
-const THEME_KEY = "pw_theme_v4";
-const HISTORY_KEY = "pw_hist_v4";
+const progressFill = document.getElementById("progress-fill")
 
-const GUESSES = { "1e3": 1e3, "1e9": 1e9, "1e12": 1e12 };
+const complexityEl = document.getElementById("complexity")
 
-const $ = s => document.querySelector(s);
+const ttc1e3 = document.getElementById("ttc-1e3")
 
-function formatSeconds(sec){
-  if (!isFinite(sec) || sec <= 0) return "∞";
-  const units = [
-    ["years",31536000],
-    ["days",86400],
-    ["hours",3600],
-    ["minutes",60],
-    ["seconds",1]
-  ];
-  for (const [label,value] of units){
-    if(sec >= value) return `${Math.floor(sec/value)} ${label}`;
-  }
-  return `${Math.round(sec)} seconds`;
-}
+const ttc1e9 = document.getElementById("ttc-1e9")
 
-/* DOM */
-const settingsBtn = $("#settingsBtn");
-const settingsPanel = $("#settingsPanel");
-const closeSettings = $("#closeSettings");
+const ttc1e12 = document.getElementById("ttc-1e12")
 
-const themeToggle = $("#themeToggle");
-const themeIcon = $("#themeIcon");
+const copyBtn = document.getElementById("copy-btn")
 
-const musicBtn = $("#musicBtn");
-const volumeSlider = $("#volumeSlider");
+const togglePassword = document.getElementById("toggle-password")
 
-const passwordInput = $("#password");
-const togglePassword = $("#toggle-password");
+const generatorModal = document.getElementById("generator-modal")
 
-const copyBtn = $("#copy-btn");
-const openGeneratorBtn = $("#open-generator-btn");
-const saveHistoryBtn = $("#saveHistoryBtn");
+const openGeneratorBtn = document.getElementById("open-generator-btn")
 
-const strengthText = $("#strength-text");
-const progressFill = $("#progress-fill");
-const requirementsList = $("#requirements");
+const generatorCancel = document.getElementById("generator-cancel")
 
-const complexityEl = $("#complexity");
-const ttc1e3 = $("#ttc-1e3");
-const ttc1e9 = $("#ttc-1e9");
-const ttc1e12 = $("#ttc-1e12");
+const generateBtn = document.getElementById("generate-btn")
 
-/* generator */
-const generatorModal = $("#generator-modal");
-const generatorClose = $("#generator-close");
-const generatorCancel = $("#generator-cancel");
-const generateBtn = $("#generate-btn");
+const lengthSlider = document.getElementById("length-slider")
 
-const lengthSlider = $("#length-slider");
-const numberSlider = $("#number-slider");
-const specialSlider = $("#special-slider");
+const numberSlider = document.getElementById("number-slider")
 
-const lengthValue = $("#length-value");
-const numberValue = $("#number-value");
-const specialValue = $("#special-value");
+const specialSlider = document.getElementById("special-slider")
 
-/* history */
-const historyModal = $("#history-modal");
-const historyClose = $("#history-close");
-const historyList = $("#history-list");
+const lengthValue = document.getElementById("length-value")
 
-const clearHistoryBtn = $("#clearHistory");
-const downloadHistoryBtn = $("#downloadHistory");
+const numberValue = document.getElementById("number-value")
 
-const openHistory = $("#openHistory");
-const exportHistory = $("#exportHistory");
-const openGeneratorSmall = $("#openGeneratorSmall");
+const specialValue = document.getElementById("special-value")
 
-/* game */
-const gamePanel = $("#gamePanel");
-const closeGame = $("#closeGame");
+function entropy(password){
 
-const gameQuestion = $("#gameQuestion");
-const gameAnswer = $("#gameAnswer");
-const submitAnswerBtn = $("#submit-answer-btn");
-const skipBtn = $("#skip-btn");
+let pool=0
 
-const gameProgress = $("#gameProgress");
-const gameMessage = $("#gameMessage");
+if(/[a-z]/.test(password)) pool+=26
+if(/[A-Z]/.test(password)) pool+=26
+if(/[0-9]/.test(password)) pool+=10
+if(/[^A-Za-z0-9]/.test(password)) pool+=32
 
-/* SETTINGS PANEL */
+if(pool===0) pool=26
 
-settingsBtn.onclick = () => {
-  settingsPanel.classList.toggle("open");
-};
-
-closeSettings.onclick = () => {
-  settingsPanel.classList.remove("open");
-};
-
-/* THEME */
-
-function saveTheme(isDark){
-  localStorage.setItem(THEME_KEY, isDark ? "dark":"light");
-}
-
-function loadTheme(){
-  return localStorage.getItem(THEME_KEY) === "dark";
-}
-
-function applyTheme(isDark){
-  document.body.classList.toggle("dark",isDark);
-  themeIcon.textContent = isDark ? "🌙":"☀️";
-}
-
-applyTheme(loadTheme());
-
-themeToggle.onclick = () => {
-  const isDark = !document.body.classList.contains("dark");
-  applyTheme(isDark);
-  saveTheme(isDark);
-};
-
-/* PASSWORD ENTROPY */
-
-function estimateEntropy(password){
-
-  if(!password) return 0;
-
-  let pool = 0;
-
-  if(/[a-z]/.test(password)) pool += 26;
-  if(/[A-Z]/.test(password)) pool += 26;
-  if(/[0-9]/.test(password)) pool += 10;
-  if(/[\W_]/.test(password)) pool += 32;
-
-  if(pool === 0) pool = 26;
-
-  return +(password.length * Math.log2(pool)).toFixed(2);
-}
-
-function timeToBreakSeconds(entropy, rate){
-  const tries = Math.pow(2, entropy-1);
-  return tries/rate;
-}
-
-function evaluatePassword(pw){
-
-  const lengthOK = pw.length >= 12;
-  const lengthStrong = pw.length >= 14;
-
-  const hasUpper = /[A-Z]/.test(pw);
-  const hasLower = /[a-z]/.test(pw);
-  const hasNumber = /[0-9]/.test(pw);
-  const hasSpecial = /[\W_]/.test(pw);
-
-  let score = 0;
-
-  if(lengthOK) score++;
-  if(hasUpper) score++;
-  if(hasLower) score++;
-  if(hasNumber) score++;
-  if(hasSpecial) score++;
-
-  let label="Requirements not met ❌";
-  let color="var(--danger)";
-
-  if(lengthStrong && score===5){
-    label="Strong ✅";
-    color="var(--good)";
-  }
-  else if(lengthOK){
-    label="Intermediate ⚠️";
-    color="var(--warn)";
-  }
-
-  const entropy = estimateEntropy(pw);
-
-  return {label,color,score,entropy,
-    requirements:{lengthOK,lengthStrong,hasUpper,hasLower,hasNumber,hasSpecial}};
-}
-
-function refreshUI(){
-
-  const pw = passwordInput.value || "";
-
-  const res = evaluatePassword(pw);
-
-  strengthText.textContent = `Password strength level: ${res.label}`;
-
-  progressFill.style.width = (res.score/5*100)+"%";
-
-  complexityEl.textContent = `Password complexity: ${res.entropy} bits`;
-
-  const t1 = timeToBreakSeconds(res.entropy,GUESSES["1e3"]);
-  const t2 = timeToBreakSeconds(res.entropy,GUESSES["1e9"]);
-  const t3 = timeToBreakSeconds(res.entropy,GUESSES["1e12"]);
-
-  ttc1e3.textContent = formatSeconds(t1);
-  ttc1e9.textContent = formatSeconds(t2);
-  ttc1e12.textContent = formatSeconds(t3);
+return password.length*Math.log2(pool)
 
 }
 
-passwordInput.addEventListener("input",refreshUI);
+function formatTime(seconds){
 
-togglePassword.onchange = function(){
-  passwordInput.type = this.checked ? "text":"password";
-};
+if(seconds>31536000) return Math.floor(seconds/31536000)+" years"
+if(seconds>86400) return Math.floor(seconds/86400)+" days"
+if(seconds>3600) return Math.floor(seconds/3600)+" hours"
+if(seconds>60) return Math.floor(seconds/60)+" minutes"
 
-/* COPY */
+return Math.floor(seconds)+" seconds"
 
-copyBtn.onclick = async () => {
-  await navigator.clipboard.writeText(passwordInput.value);
-};
-
-/* GENERATOR */
-
-function openGenerator(){
-  generatorModal.classList.add("show");
 }
 
-function closeGenerator(){
-  generatorModal.classList.remove("show");
+function updateStrength(){
+
+const pw=passwordInput.value
+
+const bits=entropy(pw)
+
+complexityEl.textContent="Password complexity: "+bits.toFixed(2)+" bits"
+
+const guesses1=2**bits/1000
+const guesses2=2**bits/1e9
+const guesses3=2**bits/1e12
+
+ttc1e3.textContent=formatTime(guesses1)
+ttc1e9.textContent=formatTime(guesses2)
+ttc1e12.textContent=formatTime(guesses3)
+
+let score=0
+
+if(pw.length>=12) score++
+if(/[A-Z]/.test(pw)) score++
+if(/[a-z]/.test(pw)) score++
+if(/[0-9]/.test(pw)) score++
+if(/[^A-Za-z0-9]/.test(pw)) score++
+
+progressFill.style.width=(score/5*100)+"%"
+
+if(score<=2){
+
+strengthText.textContent="Password strength: Weak ❌"
+
+progressFill.style.background="red"
+
 }
 
-openGeneratorBtn.onclick = openGenerator;
-openGeneratorSmall.onclick = openGenerator;
-generatorClose.onclick = closeGenerator;
-generatorCancel.onclick = closeGenerator;
+else if(score<=4){
 
-function refreshSliderLabels(){
-  lengthValue.textContent = lengthSlider.value;
-  numberValue.textContent = numberSlider.value;
-  specialValue.textContent = specialSlider.value;
+strengthText.textContent="Password strength: Medium ⚠️"
+
+progressFill.style.background="orange"
+
 }
 
-[lengthSlider,numberSlider,specialSlider].forEach(s=>{
-  s.addEventListener("input",refreshSliderLabels);
-});
+else{
 
-refreshSliderLabels();
+strengthText.textContent="Password strength: Strong ✅"
 
-function generatePassword(length=12,numbers=2,specials=2){
+progressFill.style.background="green"
 
-  const letters="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  const digits="0123456789";
-  const specialsChars="!@#$%^&*()-_=+[]{}<>?/|";
-
-  const arr=[];
-
-  for(let i=0;i<numbers;i++)
-    arr.push(digits[Math.floor(Math.random()*digits.length)]);
-
-  for(let i=0;i<specials;i++)
-    arr.push(specialsChars[Math.floor(Math.random()*specialsChars.length)]);
-
-  while(arr.length < length)
-    arr.push(letters[Math.floor(Math.random()*letters.length)]);
-
-  for(let i=arr.length-1;i>0;i--){
-    const j=Math.floor(Math.random()*(i+1));
-    [arr[i],arr[j]]=[arr[j],arr[i]];
-  }
-
-  return arr.join("");
 }
 
-generateBtn.onclick = () => {
-
-  const l = +lengthSlider.value;
-  const n = +numberSlider.value;
-  const s = +specialSlider.value;
-
-  const pw = generatePassword(l,n,s);
-
-  passwordInput.value = pw;
-
-  refreshUI();
-
-  closeGenerator();
-
-};
-
-/* GAME */
-
-const steps = [
-
-{q:"Type 2 uppercase letters",test:s=>/^[A-Z]{2}$/.test(s)},
-{q:"Type symbol + number",test:s=>/^[!@#$%^&*][0-9]$/.test(s)},
-{q:"Type 3 lowercase letters",test:s=>/^[a-z]{3}$/.test(s)},
-{q:"Type 4 random digits",test:s=>/^[0-9]{4}$/.test(s)},
-{q:"Type two words with symbol (moon#lake)",test:s=>/^([A-Za-z]{3,6})([!@#$%^&*])([A-Za-z]{3,6})$/.test(s)}
-
-];
-
-let gi=0;
-let built="";
-
-function openGame(){
-  gamePanel.classList.add("open");
-  gi=0;
-  built="";
-  showStep();
 }
 
-function closeGamePanel(){
-  gamePanel.classList.remove("open");
+passwordInput.addEventListener("input",updateStrength)
+
+togglePassword.onchange=()=>{
+
+passwordInput.type=togglePassword.checked?"text":"password"
+
 }
 
-function showStep(){
-  gameQuestion.textContent = steps[gi].q;
-  gameProgress.textContent = `Step ${gi+1}/5`;
-  gameAnswer.value="";
+copyBtn.onclick=()=>{
+
+navigator.clipboard.writeText(passwordInput.value)
+
 }
 
-submitAnswerBtn.onclick = () => {
+openGeneratorBtn.onclick=()=>{
 
-  const v = gameAnswer.value.trim();
+generatorModal.classList.add("show")
 
-  if(steps[gi].test(v)){
+}
 
-    built+=v;
+generatorCancel.onclick=()=>{
 
-    gi++;
+generatorModal.classList.remove("show")
 
-    if(gi<steps.length) showStep();
-    else{
-      passwordInput.value = built;
-      refreshUI();
-      closeGamePanel();
-    }
+}
 
-  }
-};
+function generatePassword(len,numbers,specials){
 
-skipBtn.onclick = () => {
+const letters="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-  built += Math.random().toString(36).slice(2,5);
+const digits="0123456789"
 
-  gi++;
+const special="!@#$%^&*"
 
-  if(gi<steps.length) showStep();
-  else{
-    passwordInput.value=built;
-    refreshUI();
-    closeGamePanel();
-  }
+let arr=[]
 
-};
+for(let i=0;i<numbers;i++)
+arr.push(digits[Math.floor(Math.random()*digits.length)])
 
-closeGame.onclick = closeGamePanel;
+for(let i=0;i<specials;i++)
+arr.push(special[Math.floor(Math.random()*special.length)])
 
-$("#modeGamified").onclick = openGame;
-$("#modePassword").onclick = closeGamePanel;
+while(arr.length<len)
+arr.push(letters[Math.floor(Math.random()*letters.length)])
 
-refreshUI();
+return arr.sort(()=>Math.random()-0.5).join("")
+
+}
+
+generateBtn.onclick=()=>{
+
+const pw=generatePassword(
+
++lengthSlider.value,
+
++numberSlider.value,
+
++specialSlider.value
+
+)
+
+passwordInput.value=pw
+
+updateStrength()
+
+generatorModal.classList.remove("show")
+
+}
+
+lengthSlider.oninput=()=>lengthValue.textContent=lengthSlider.value
+numberSlider.oninput=()=>numberValue.textContent=numberSlider.value
+specialSlider.oninput=()=>specialValue.textContent=specialSlider.value
+
+updateStrength()
