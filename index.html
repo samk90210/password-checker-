@@ -49,20 +49,35 @@
     <div id="complexity" class="complexity-label">Password complexity: —</div>
 
     <div class="ttc-grid">
-      <div class="ttc-card">
+      <div class="ttc-card" id="ttc-card-online" data-attack="online" tabindex="0" role="button" aria-label="Learn about online attacks">
         <div class="ttc-icon">🐢</div>
         <div class="ttc-label">Online attack<br><small>1k/s</small></div>
         <div class="ttc-value" id="ttc-1e3">—</div>
+        <div class="ttc-info-hint">ℹ️ tap to learn</div>
       </div>
-      <div class="ttc-card">
+      <div class="ttc-card" id="ttc-card-offline" data-attack="offline" tabindex="0" role="button" aria-label="Learn about offline attacks">
         <div class="ttc-icon">⚡</div>
         <div class="ttc-label">Offline attack<br><small>1B/s</small></div>
         <div class="ttc-value" id="ttc-1e9">—</div>
+        <div class="ttc-info-hint">ℹ️ tap to learn</div>
       </div>
-      <div class="ttc-card">
+      <div class="ttc-card" id="ttc-card-cluster" data-attack="cluster" tabindex="0" role="button" aria-label="Learn about cluster attacks">
         <div class="ttc-icon">🚀</div>
         <div class="ttc-label">Cluster attack<br><small>1T/s</small></div>
         <div class="ttc-value" id="ttc-1e12">—</div>
+        <div class="ttc-info-hint">ℹ️ tap to learn</div>
+      </div>
+    </div>
+
+    <!-- Attack info modal -->
+    <div id="attack-modal" class="modal">
+      <div class="modal-content attack-modal-content">
+        <div class="attack-modal-icon" id="attackModalIcon"></div>
+        <h3 id="attackModalTitle"></h3>
+        <div class="attack-modal-speed" id="attackModalSpeed"></div>
+        <p id="attackModalDesc"></p>
+        <div class="attack-modal-example" id="attackModalExample"></div>
+        <button id="attackModalClose" class="btn-primary" style="margin-top:8px">Got it!</button>
       </div>
     </div>
 
@@ -105,7 +120,11 @@
       <div class="win-emoji">🏆</div>
       <h2>You Win!</h2>
       <p>You survived all the rules. Legendary.</p>
-      <button id="playAgainBtn">Play Again</button>
+      <div class="win-password-preview" id="winPasswordPreview"></div>
+      <div class="win-buttons">
+        <button id="copyWinPasswordBtn">📋 Copy Password</button>
+        <button id="playAgainBtn">🔄 Play Again</button>
+      </div>
     </div>
   </div>
 </div>
