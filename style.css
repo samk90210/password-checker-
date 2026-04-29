@@ -295,12 +295,69 @@ button:active { transform: translateY(0); }
   border-radius: 12px;
   padding: 14px 10px;
   text-align: center;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  position: relative;
 }
-.ttc-card:hover { border-color: var(--accent); }
+.ttc-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(79,70,229,0.15);
+}
+.ttc-card:active { transform: translateY(0); }
 .ttc-icon { font-size: 22px; margin-bottom: 4px; }
 .ttc-label { font-size: 11px; color: var(--text2); line-height: 1.4; margin-bottom: 6px; }
 .ttc-value { font-size: 13px; font-weight: 700; font-family: var(--mono); color: var(--accent); }
+.ttc-info-hint {
+  font-size: 10px;
+  color: var(--accent);
+  margin-top: 6px;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+  letter-spacing: 0.2px;
+}
+.ttc-card:hover .ttc-info-hint { opacity: 1; }
+
+/* ===== ATTACK INFO MODAL ===== */
+.attack-modal-content {
+  max-width: 360px;
+  text-align: center;
+  gap: 12px;
+}
+.attack-modal-icon {
+  font-size: 52px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.attack-modal-speed {
+  display: inline-block;
+  background: var(--pill-bg);
+  border: 1.5px solid var(--pill-border);
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 4px 14px;
+  border-radius: 999px;
+  margin-bottom: 4px;
+}
+.attack-modal-content p {
+  font-size: 14px;
+  color: var(--text2);
+  line-height: 1.65;
+  text-align: left;
+}
+.attack-modal-example {
+  background: var(--bg);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--text2);
+  text-align: left;
+  line-height: 1.6;
+  font-style: italic;
+}
 
 /* ===== CRITERIA CHECKLIST ===== */
 .criteria-list {
@@ -423,8 +480,32 @@ button:active { transform: translateY(0); }
   50% { transform: translateY(-12px); }
 }
 .win-screen h2 { font-size: 32px; font-weight: 800; margin-bottom: 8px; }
-.win-screen p { color: var(--text2); margin-bottom: 24px; }
-#playAgainBtn { padding: 12px 32px; font-size: 16px; }
+.win-screen p { color: var(--text2); margin-bottom: 16px; }
+.win-password-preview {
+  background: var(--bg);
+  border: 2px dashed var(--accent);
+  border-radius: 12px;
+  padding: 12px 20px;
+  font-family: var(--mono);
+  font-size: 14px;
+  color: var(--accent);
+  word-break: break-all;
+  margin-bottom: 20px;
+  max-width: 100%;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.win-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+#playAgainBtn { padding: 12px 24px; font-size: 15px; }
+#copyWinPasswordBtn { padding: 12px 24px; font-size: 15px; background: var(--accent); color: white; border-color: var(--accent); }
+#copyWinPasswordBtn:hover { background: var(--accent2); border-color: var(--accent2); }
 
 /* ===== MODAL ===== */
 .modal {
