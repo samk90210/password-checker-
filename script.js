@@ -98,10 +98,10 @@ function entropy(pw) {
 }
 
 function formatTime(seconds) {
-  if (seconds === Infinity || isNaN(seconds)) return "♾️ Forever";
+  if (seconds === Infinity || isNaN(seconds)) return "🔒 Impossible";
+  // Anything over 1 billion years is effectively impossible to crack
+  if (seconds >= 1e9 * 365.25 * 24 * 3600) return "🔒 Impossible";
   const units = [
-    [1e12 * 365.25 * 24 * 3600, "trillion years"],
-    [1e9 * 365.25 * 24 * 3600,  "billion years"],
     [1e6 * 365.25 * 24 * 3600,  "million years"],
     [365.25 * 24 * 3600,         "years"],
     [86400,                       "days"],
@@ -186,9 +186,15 @@ function updateStrength() {
   const g1   = Math.pow(2, bits) / 1e3;
   const g2   = Math.pow(2, bits) / 1e9;
   const g3   = Math.pow(2, bits) / 1e12;
-  ttc1e3.textContent  = formatTime(g1);
-  ttc1e9.textContent  = formatTime(g2);
-  ttc1e12.textContent = formatTime(g3);
+  function setTtc(el, seconds) {
+    const text = formatTime(seconds);
+    el.textContent = text;
+    el.style.color = text === "🔒 Impossible" ? "var(--success)" : "var(--accent)";
+    el.style.fontSize = text === "🔒 Impossible" ? "12px" : "";
+  }
+  setTtc(ttc1e3,  g1);
+  setTtc(ttc1e9,  g2);
+  setTtc(ttc1e12, g3);
 
   const score = getScore(pw);
   const pct = (score / 7 * 100).toFixed(1);
@@ -579,6 +585,8 @@ function renderRules(pw) {
   // WIN
   if (passCount === totalRules && totalRules > 0) {
     setTimeout(() => {
+      const preview = document.getElementById("winPasswordPreview");
+      if (preview) preview.textContent = pw || gamePasswordInput.value;
       winScreen.classList.remove("hidden");
       rulesContainer.style.display = "none";
       showToast("🏆 You won the Password Game!", 4000);
@@ -619,6 +627,19 @@ playAgainBtn.onclick = () => {
   renderRules("");
 };
 
+const copyWinPasswordBtn = document.getElementById("copyWinPasswordBtn");
+if (copyWinPasswordBtn) {
+  copyWinPasswordBtn.onclick = () => {
+    const pw = gamePasswordInput.value;
+    if (!pw) { showToast("No password to copy!"); return; }
+    navigator.clipboard.writeText(pw).then(() => {
+      copyWinPasswordBtn.textContent = "✅ Copied!";
+      setTimeout(() => { copyWinPasswordBtn.textContent = "📋 Copy Password"; }, 2000);
+      showToast("✅ Winning password copied!");
+    });
+  };
+}
+
 // ===== MODAL CLICK-OUTSIDE =====
 generatorModal.addEventListener("click", e => {
   if (e.target === generatorModal) generatorModal.classList.remove("show");
@@ -629,3 +650,59 @@ applyTheme(isDark);
 loadTip();
 updateStrength();
 renderHistory();
+
+// ===== ATTACK INFO MODAL =====
+const ATTACK_INFO = {
+  online: {
+    icon: "🐢",
+    title: "Online Attack",
+    speed: "~1,000 guesses/sec",
+    desc: "An online attack is what happens when a hacker tries to log into a live website by guessing your password directly. The website's server slows them down — it has rate limits, lockouts after failed attempts, and CAPTCHAs. This is the slowest type of attack, making even moderately strong passwords very hard to crack this way.",
+    example: "Think of someone repeatedly trying passwords on a login page until they get locked out. Most sites block after 5–10 failed attempts."
+  },
+  offline: {
+    icon: "⚡",
+    title: "Offline Attack",
+    speed: "~1,000,000,000 guesses/sec",
+    desc: "An offline attack happens after a hacker steals a database of hashed passwords from a breached website. They no longer need to interact with any server — they can run guesses on their own hardware at full speed. A modern GPU can test billions of passwords per second. This is far more dangerous than online attacks.",
+    example: "When major sites like LinkedIn or RockYou were breached, attackers downloaded all the password hashes and cracked them at home using GPU rigs — no rate limiting, no lockouts."
+  },
+  cluster: {
+    icon: "🚀",
+    title: "Cluster Attack",
+    speed: "~1,000,000,000,000 guesses/sec",
+    desc: "A cluster attack uses dozens or hundreds of machines working together — like a cloud computing farm or a botnet — to crack passwords in parallel. Intelligence agencies, well-funded criminal groups, or large botnets can achieve this. At a trillion guesses per second, even long passwords can fall quickly if they follow predictable patterns.",
+    example: "Imagine 1,000 GPUs all running simultaneously, each testing different parts of the password space. Nation-state attackers and serious cybercriminal groups operate at this scale."
+  }
+};
+
+const attackModal  = document.getElementById("attack-modal");
+const attackIcon   = document.getElementById("attackModalIcon");
+const attackTitle  = document.getElementById("attackModalTitle");
+const attackSpeed  = document.getElementById("attackModalSpeed");
+const attackDesc   = document.getElementById("attackModalDesc");
+const attackExample= document.getElementById("attackModalExample");
+const attackClose  = document.getElementById("attackModalClose");
+
+function openAttackModal(type) {
+  const info = ATTACK_INFO[type];
+  attackIcon.textContent   = info.icon;
+  attackTitle.textContent  = info.title;
+  attackSpeed.textContent  = info.speed;
+  attackDesc.textContent   = info.desc;
+  attackExample.textContent= "💡 " + info.example;
+  attackModal.classList.add("show");
+}
+
+["online","offline","cluster"].forEach(type => {
+  const card = document.getElementById(`ttc-card-${type}`);
+  if (card) {
+    card.addEventListener("click", () => openAttackModal(type));
+    card.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") openAttackModal(type); });
+  }
+});
+
+attackClose.onclick = () => attackModal.classList.remove("show");
+attackModal.addEventListener("click", e => {
+  if (e.target === attackModal) attackModal.classList.remove("show");
+});
