@@ -1,115 +1,187 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Password Trainer</title>
-
 <link rel="stylesheet" href="style.css">
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 </head>
-
 <body>
 
-<button id="settingsBtn">⚙️</button>
+<!-- Settings Button -->
+<button id="settingsBtn" title="Settings">⚙️</button>
 
-<div class="main-card">
+<!-- Toast notification -->
+<div id="toast"></div>
 
-<h1>Password Checker</h1>
+<!-- Main App -->
+<div class="app-wrapper">
+  <header class="site-header">
+    <div class="logo">🔐 PassTrainer</div>
+    <div class="mode-row">
+      <button id="modePassword" class="mode-pill active">🛡️ Password Mode</button>
+      <button id="modeGamified" class="mode-pill">🎮 Gamified Mode</button>
+    </div>
+  </header>
 
-<div class="mode-row">
+  <!-- PASSWORD MODE -->
+  <div id="passwordMode" class="main-card mode-section active">
+    <h1>Password Checker</h1>
 
-<button id="modePassword" class="mode-pill active">Password Mode</button>
+    <div class="input-wrap">
+      <input id="password" type="password" placeholder="Type your password here…" autocomplete="off">
+      <label class="toggle-inline">
+        <input id="toggle-password" type="checkbox"> 👁
+      </label>
+    </div>
 
-<button id="modeGamified" class="mode-pill">Gamified Mode</button>
+    <div class="small-row">
+      <button id="copy-btn">📋 Copy</button>
+      <button id="open-generator-btn">🎲 Generate</button>
+      <button id="saveHistoryBtn">💾 Save</button>
+    </div>
 
+    <div id="strength-text" class="strength-label">Password strength: —</div>
+    <div class="progress-bar">
+      <div id="progress-fill"></div>
+    </div>
+    <div id="complexity" class="complexity-label">Password complexity: —</div>
+
+    <div class="ttc-grid">
+      <div class="ttc-card">
+        <div class="ttc-icon">🐢</div>
+        <div class="ttc-label">Online attack<br><small>1k/s</small></div>
+        <div class="ttc-value" id="ttc-1e3">—</div>
+      </div>
+      <div class="ttc-card">
+        <div class="ttc-icon">⚡</div>
+        <div class="ttc-label">Offline attack<br><small>1B/s</small></div>
+        <div class="ttc-value" id="ttc-1e9">—</div>
+      </div>
+      <div class="ttc-card">
+        <div class="ttc-icon">🚀</div>
+        <div class="ttc-label">Cluster attack<br><small>1T/s</small></div>
+        <div class="ttc-value" id="ttc-1e12">—</div>
+      </div>
+    </div>
+
+    <!-- Criteria checklist -->
+    <div class="criteria-list">
+      <div class="criteria-item" id="c-length">⬜ At least 8 characters</div>
+      <div class="criteria-item" id="c-length12">⬜ At least 12 characters</div>
+      <div class="criteria-item" id="c-upper">⬜ Uppercase letter</div>
+      <div class="criteria-item" id="c-lower">⬜ Lowercase letter</div>
+      <div class="criteria-item" id="c-number">⬜ Number</div>
+      <div class="criteria-item" id="c-special">⬜ Special character</div>
+      <div class="criteria-item" id="c-norepeat">⬜ No 3+ repeated characters</div>
+    </div>
+
+    <!-- Tip of the day -->
+    <div class="tip-box" id="tipBox"></div>
+  </div>
+
+  <!-- GAMIFIED MODE -->
+  <div id="gamifiedMode" class="main-card mode-section">
+    <div class="game-header">
+      <h1>🎮 The Password Game</h1>
+      <div class="game-meta">
+        <span class="rules-count">Rules passed: <strong id="rulesPassed">0</strong></span>
+        <button id="restartGame" class="restart-btn">🔄 Restart</button>
+      </div>
+    </div>
+
+    <div class="input-wrap">
+      <input id="gamePassword" type="text" placeholder="Start typing your password…" autocomplete="off">
+    </div>
+
+    <div id="game-progress-bar" class="progress-bar">
+      <div id="game-progress-fill"></div>
+    </div>
+
+    <div id="rules-container"></div>
+
+    <div id="win-screen" class="win-screen hidden">
+      <div class="win-emoji">🏆</div>
+      <h2>You Win!</h2>
+      <p>You survived all the rules. Legendary.</p>
+      <button id="playAgainBtn">Play Again</button>
+    </div>
+  </div>
 </div>
 
-<div class="input-wrap">
-
-<input id="password" type="password" placeholder="Enter your password">
-
-<label class="toggle-inline">
-
-<input id="toggle-password" type="checkbox"> Show
-
-</label>
-
-</div>
-
-<div class="small-row">
-
-<button id="copy-btn">📋 Copy</button>
-
-<button id="open-generator-btn">🎲 Generator</button>
-
-<button id="saveHistoryBtn">💾 Save</button>
-
-</div>
-
-<div id="strength-text">Password strength level: —</div>
-
-<div class="progress-bar">
-
-<div id="progress-fill"></div>
-
-</div>
-
-<div id="complexity">Password complexity: —</div>
-
-<div class="ttc">
-
-<div>Online attack: <span id="ttc-1e3"></span></div>
-
-<div>Offline attack: <span id="ttc-1e9"></span></div>
-
-<div>Cluster attack: <span id="ttc-1e12"></span></div>
-
-</div>
-
-</div>
-
+<!-- GENERATOR MODAL -->
 <div id="generator-modal" class="modal">
-
-<div class="modal-content">
-
-<h3>Password Generator</h3>
-
-<label>
-Length
-<input id="length-slider" type="range" min="8" max="32" value="12">
-<span id="length-value">12</span>
-</label>
-
-<label>
-Numbers
-<input id="number-slider" type="range" min="0" max="10" value="2">
-<span id="number-value">2</span>
-</label>
-
-<label>
-Specials
-<input id="special-slider" type="range" min="0" max="10" value="2">
-<span id="special-value">2</span>
-</label>
-
-<div class="row">
-
-<button id="generate-btn">Generate</button>
-
-<button id="generator-cancel">Cancel</button>
-
+  <div class="modal-content">
+    <h3>🎲 Password Generator</h3>
+    <label>
+      Length: <strong id="length-value">12</strong>
+      <input id="length-slider" type="range" min="8" max="32" value="12">
+    </label>
+    <label>
+      Numbers: <strong id="number-value">2</strong>
+      <input id="number-slider" type="range" min="0" max="10" value="2">
+    </label>
+    <label>
+      Specials: <strong id="special-value">2</strong>
+      <input id="special-slider" type="range" min="0" max="10" value="2">
+    </label>
+    <div class="generated-preview" id="generatedPreview">—</div>
+    <div class="row">
+      <button id="generate-btn">✨ Generate</button>
+      <button id="use-generated-btn" class="btn-primary" disabled>✅ Use This</button>
+      <button id="generator-cancel">Cancel</button>
+    </div>
+  </div>
 </div>
 
-</div>
+<!-- SETTINGS MODAL -->
+<div id="settings-modal" class="modal">
+  <div class="modal-content settings-content">
+    <h3>⚙️ Settings</h3>
 
+    <div class="settings-section">
+      <h4>🎨 Appearance</h4>
+      <div class="setting-row">
+        <span>Dark Mode</span>
+        <label class="switch">
+          <input type="checkbox" id="darkModeToggle">
+          <span class="slider-track"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h4>🎵 Background Music</h4>
+      <div class="setting-row">
+        <span>Enable Music</span>
+        <label class="switch">
+          <input type="checkbox" id="musicToggle">
+          <span class="slider-track"></span>
+        </label>
+      </div>
+      <div class="setting-row" id="musicControls" style="display:none">
+        <span>Volume</span>
+        <input type="range" id="volumeSlider" min="0" max="100" value="30" style="width:120px">
+        <span id="volumeValue">30%</span>
+      </div>
+      <div id="musicVisualizer" class="music-viz hidden">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h4>🕑 Password History</h4>
+      <div id="historyList" class="history-list">
+        <p class="empty-history">No saved passwords yet. Hit 💾 Save in Password Mode!</p>
+      </div>
+      <button id="clearHistoryBtn" class="danger-btn">🗑️ Clear History</button>
+    </div>
+
+    <button id="settings-close" class="btn-primary" style="margin-top:10px">Done</button>
+  </div>
 </div>
 
 <script src="script.js"></script>
-
 </body>
 </html>
