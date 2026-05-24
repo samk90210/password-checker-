@@ -1,4 +1,4 @@
-/* base  */
+/* base*/
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
@@ -31,8 +31,8 @@ header {
   font-weight: 700;
   color: #4f46e5;
 }
-
-/* mode pill  */
+/* this is the shape of the buttons since it has a big border it will look like a capsure/pill which givse it the rounded corners */
+/* rounded buttons */
 .mode-row {
   display: flex;
   gap: 6px;
@@ -75,7 +75,7 @@ header {
 
 .hidden { display: none; }
 
-/* input  */
+/* input */
 .row {
   display: flex;
   align-items: center;
@@ -110,7 +110,7 @@ label {
   gap: 5px;
 }
 
-/* buttons  */
+/* input buttons */
 button {
   padding: 9px 16px;
   border-radius: 10px;
@@ -124,7 +124,8 @@ button {
 
 button:hover { background: #f0f0f0; }
 
-/* strength  */
+/ * This will help us see how strong the code is */
+/* strength */
 .strength {
   font-size: 16px;
   font-weight: 700;
@@ -139,7 +140,8 @@ button:hover { background: #f0f0f0; }
   margin-bottom: 16px;
 }
 
-/* progress bar  */
+/ *wil contain progress of gamify mode */
+/* progress */
 .bar-wrap {
   height: 10px;
   background: #eee;
@@ -155,6 +157,7 @@ button:hover { background: #f0f0f0; }
   transition: width 0.4s, background 0.4s;
 }
 
+/* check to see if all criteria is met for checklist within app */
 /* checklist */
 .checklist {
   display: grid;
@@ -179,7 +182,7 @@ button:hover { background: #f0f0f0; }
   font-weight: 600;
 }
 
-/* tip box */
+/* tipbox  */
 .tip-box {
   background: #eef2ff;
   border: 1.5px solid #c7d2fe;
@@ -195,6 +198,7 @@ button:hover { background: #f0f0f0; }
   font-weight: 700;
 }
 
+/ *giving credit to the pass word game neal.fun */
 /* game credit */
 .credit {
   font-size: 12px;
@@ -274,15 +278,7 @@ button:hover { background: #f0f0f0; }
 .rule-desc { font-size: 13px; color: #555; line-height: 1.5; }
 .rule-hint { font-size: 12px; color: #4f46e5; margin-top: 4px; font-style: italic; }
 
-/* win box */
-.win-box {
-  text-align: center;
-  padding: 30px 16px;
-  margin-top: 16px;
-  background: #f0fdf4;
-  border: 2px solid #10b981;
-  border-radius: 12px;
-}
+
 
 .win-box h2 { font-size: 26px; margin-bottom: 8px; }
 .win-box p  { color: #555; margin-bottom: 8px; }
@@ -295,7 +291,7 @@ button:hover { background: #f0f0f0; }
   margin-bottom: 16px !important;
 }
 
-/* responsive *
+/* response */
 @media (max-width: 480px) {
   .checklist { grid-template-columns: 1fr; }
   header { flex-direction: column; align-items: flex-start; }
