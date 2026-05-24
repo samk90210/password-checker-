@@ -1,708 +1,461 @@
-/* ============================================================
-   PASSWORD TRAINER - COMPLETE SCRIPT
-   ============================================================ */
+/*
+ * script.js - Password Trainer
+ * CS50x Final Project
+ *
+ * Author: [Your Name]
+ * GitHub: [Your GitHub Username]
+ * edX:    [Your edX Username]
+ *
+ * NOTE: The UI layout and styling of this project were built with assistance
+ * from Claude (Anthropic) via claude.ai. The core logic was written and
+ * understood by the author as part of this CS50 submission.
+ * The Gamified Mode was inspired by The Password Game by Neal Agarwal (neal.fun).
+ * AI use is disclosed in accordance with CS50's Academic Honesty policy.
+ */
 
-// ===== DOM REFS =====
-const passwordInput   = document.getElementById("password");
-const strengthText    = document.getElementById("strength-text");
-const progressFill    = document.getElementById("progress-fill");
-const complexityEl    = document.getElementById("complexity");
-const ttc1e3          = document.getElementById("ttc-1e3");
-const ttc1e9          = document.getElementById("ttc-1e9");
-const ttc1e12         = document.getElementById("ttc-1e12");
-const copyBtn         = document.getElementById("copy-btn");
-const togglePassword  = document.getElementById("toggle-password");
-const saveHistoryBtn  = document.getElementById("saveHistoryBtn");
-const tipBox          = document.getElementById("tipBox");
+// =============================================================================
+// DOM ELEMENTS
+// document.getElementById finds an HTML element by its id attribute.
+// We store each one in a variable so we can read or change it later.
+// =============================================================================
 
-// Mode
-const modePwBtn       = document.getElementById("modePassword");
-const modeGameBtn     = document.getElementById("modeGamified");
-const passwordMode    = document.getElementById("passwordMode");
-const gamifiedMode    = document.getElementById("gamifiedMode");
+var pwInput       = document.getElementById("pwInput");
+var showPw        = document.getElementById("showPw");
+var strengthLabel = document.getElementById("strengthLabel");
+var bar           = document.getElementById("bar");
+var bitsLabel     = document.getElementById("bitsLabel");
+var tip           = document.getElementById("tip");
 
-// Generator
-const generatorModal  = document.getElementById("generator-modal");
-const openGeneratorBtn= document.getElementById("open-generator-btn");
-const generatorCancel = document.getElementById("generator-cancel");
-const generateBtn     = document.getElementById("generate-btn");
-const useGeneratedBtn = document.getElementById("use-generated-btn");
-const lengthSlider    = document.getElementById("length-slider");
-const numberSlider    = document.getElementById("number-slider");
-const specialSlider   = document.getElementById("special-slider");
-const lengthValue     = document.getElementById("length-value");
-const numberValue     = document.getElementById("number-value");
-const specialValue    = document.getElementById("special-value");
-const generatedPreview= document.getElementById("generatedPreview");
+var btnPassword   = document.getElementById("btnPassword");
+var btnGame       = document.getElementById("btnGame");
+var passwordMode  = document.getElementById("passwordMode");
+var gameMode      = document.getElementById("gameMode");
 
-// Settings
-const settingsBtn     = document.getElementById("settingsBtn");
-const settingsModal   = document.getElementById("settings-modal");
-const settingsClose   = document.getElementById("settings-close");
-const darkModeToggle  = document.getElementById("darkModeToggle");
-const musicToggle     = document.getElementById("musicToggle");
-const volumeSlider    = document.getElementById("volumeSlider");
-const volumeValue     = document.getElementById("volumeValue");
-const musicControls   = document.getElementById("musicControls");
-const musicVisualizer = document.getElementById("musicVisualizer");
-const historyList     = document.getElementById("historyList");
-const clearHistoryBtn = document.getElementById("clearHistoryBtn");
+var gamePw        = document.getElementById("gamePw");
+var restartBtn    = document.getElementById("restartBtn");
+var gameBar       = document.getElementById("gameBar");
+var gameCount     = document.getElementById("gameCount");
+var rulesList     = document.getElementById("rulesList");
+var winBox        = document.getElementById("winBox");
+var winPw         = document.getElementById("winPw");
+var playAgain     = document.getElementById("playAgain");
 
-// Game
-const gamePasswordInput= document.getElementById("gamePassword");
-const rulesContainer  = document.getElementById("rules-container");
-const rulesPassed     = document.getElementById("rulesPassed");
-const gameProgressFill= document.getElementById("game-progress-fill");
-const restartGame     = document.getElementById("restartGame");
-const winScreen       = document.getElementById("win-screen");
-const playAgainBtn    = document.getElementById("playAgainBtn");
+// =============================================================================
+// TIPS ARRAY
+// An array stores multiple values under one variable name.
+// We pick one randomly on page load to show in the tip box.
+// =============================================================================
 
-// Toast
-const toast           = document.getElementById("toast");
-
-// ===== STATE =====
-let passwordHistory = JSON.parse(localStorage.getItem("pwHistory") || "[]");
-let isDark = localStorage.getItem("darkMode") === "true";
-let musicEnabled = false;
-let audioCtx = null;
-let musicNodes = [];
-let lastGeneratedPw = "";
-
-// ===== TIPS =====
-const TIPS = [
-  "Use a passphrase! 'correct-horse-battery-staple' is far stronger than 'P@ss1'.",
-  "Never reuse passwords across sites — one breach exposes all.",
-  "A password manager (Bitwarden, 1Password) lets you use unique 20+ char passwords everywhere.",
-  "Length matters more than complexity. 20 random letters beats 8 mixed chars.",
-  "Enable 2-factor authentication wherever possible for an extra security layer.",
-  "Dictionary words + numbers like 'password123' are the first things crackers try.",
-  "Avoid personal info: birthdays, names, and pet names are guessable.",
-  "Check haveibeenpwned.com to see if your email has been in a breach.",
+var tips = [
+  "Use a passphrase — a short sentence is easy to remember and hard to crack.",
+  "Never use the same password on two different websites.",
+  "Longer passwords are stronger. 20 random letters beats 8 mixed characters.",
+  "Avoid using your name, birthday, or pet's name in your password.",
+  "Turn on two-factor authentication wherever you can for extra protection.",
 ];
 
-// ===== UTILS =====
-function showToast(msg, duration = 2200) {
-  toast.textContent = msg;
-  toast.classList.add("show");
-  setTimeout(() => toast.classList.remove("show"), duration);
-}
+// =============================================================================
+// ENTROPY CALCULATION
+// Entropy tells us how hard a password is to guess, measured in bits.
+// The formula is: bits = length x log2(pool size)
+// Pool size = how many different characters the attacker must consider.
+// Example: only lowercase letters = pool of 26.
+//          lowercase + digits = pool of 36.
+// The more bits, the longer it takes to crack the password by guessing.
+// =============================================================================
 
-function entropy(pw) {
-  let pool = 0;
-  if (/[a-z]/.test(pw)) pool += 26;
-  if (/[A-Z]/.test(pw)) pool += 26;
-  if (/[0-9]/.test(pw)) pool += 10;
-  if (/[^A-Za-z0-9]/.test(pw)) pool += 32;
+function calcEntropy(pw) {
+  var pool = 0;
+  if (/[a-z]/.test(pw)) pool = pool + 26;
+  if (/[A-Z]/.test(pw)) pool = pool + 26;
+  if (/[0-9]/.test(pw)) pool = pool + 10;
+  if (/[^A-Za-z0-9]/.test(pw)) pool = pool + 32;
   if (pool === 0) pool = 26;
   return pw.length * Math.log2(pool);
 }
 
-function formatTime(seconds) {
-  if (seconds === Infinity || isNaN(seconds)) return "🔒 Impossible";
-  // Anything over 1 billion years is effectively impossible to crack
-  if (seconds >= 1e9 * 365.25 * 24 * 3600) return "🔒 Impossible";
-  const units = [
-    [1e6 * 365.25 * 24 * 3600,  "million years"],
-    [365.25 * 24 * 3600,         "years"],
-    [86400,                       "days"],
-    [3600,                        "hours"],
-    [60,                          "minutes"],
-    [1,                           "seconds"],
+// =============================================================================
+// PASSWORD SCORE
+// We check 7 criteria and give 1 point for each one met.
+// The score (0-7) is used to fill the progress bar and pick a label.
+// =============================================================================
+
+function calcScore(pw) {
+  var score = 0;
+  if (pw.length >= 8)            score = score + 1;
+  if (pw.length >= 12)           score = score + 1;
+  if (/[A-Z]/.test(pw))          score = score + 1;
+  if (/[a-z]/.test(pw))          score = score + 1;
+  if (/[0-9]/.test(pw))          score = score + 1;
+  if (/[^A-Za-z0-9]/.test(pw))  score = score + 1;
+  if (!(/(.)\1\1/.test(pw)) && pw.length > 0) score = score + 1;
+  return score;
+}
+
+// =============================================================================
+// UPDATE CHECKLIST
+// Loops through each criterion and marks it green (pass) or grey (fail).
+// =============================================================================
+
+function updateChecklist(pw) {
+  var results = [
+    pw.length >= 8,
+    pw.length >= 12,
+    /[A-Z]/.test(pw),
+    /[a-z]/.test(pw),
+    /[0-9]/.test(pw),
+    /[^A-Za-z0-9]/.test(pw),
+    !(/(.)\1\1/.test(pw)) && pw.length > 0,
   ];
-  for (const [div, label] of units) {
-    if (seconds >= div) {
-      const v = Math.floor(seconds / div);
-      return `${v.toLocaleString()} ${label}`;
-    }
-  }
-  return "< 1 second";
-}
 
-// ===== PASSWORD MODE =====
-function getScore(pw) {
-  let score = 0;
-  if (pw.length >= 8)  score++;
-  if (pw.length >= 12) score++;
-  if (/[A-Z]/.test(pw)) score++;
-  if (/[a-z]/.test(pw)) score++;
-  if (/[0-9]/.test(pw)) score++;
-  if (/[^A-Za-z0-9]/.test(pw)) score++;
-  if (!/(.)\1\1/.test(pw) && pw.length > 0) score++;
-  return score; // 0-7
-}
+  var labels = [
+    "At least 8 characters",
+    "At least 12 characters",
+    "Uppercase letter (A-Z)",
+    "Lowercase letter (a-z)",
+    "A number (0-9)",
+    "A special character (!@#$...)",
+    "No 3 repeated chars in a row",
+  ];
 
-function updateCriteria(pw) {
-  const checks = {
-    "c-length":   pw.length >= 8,
-    "c-length12": pw.length >= 12,
-    "c-upper":    /[A-Z]/.test(pw),
-    "c-lower":    /[a-z]/.test(pw),
-    "c-number":   /[0-9]/.test(pw),
-    "c-special":  /[^A-Za-z0-9]/.test(pw),
-    "c-norepeat": !(/(.)\1\1/.test(pw)) && pw.length > 0,
-  };
-  const labels = {
-    "c-length":   "✅ At least 8 characters",
-    "c-length12": "✅ At least 12 characters",
-    "c-upper":    "✅ Uppercase letter",
-    "c-lower":    "✅ Lowercase letter",
-    "c-number":   "✅ Number",
-    "c-special":  "✅ Special character",
-    "c-norepeat": "✅ No 3+ repeated characters",
-  };
-  const failLabels = {
-    "c-length":   "⬜ At least 8 characters",
-    "c-length12": "⬜ At least 12 characters",
-    "c-upper":    "⬜ Uppercase letter",
-    "c-lower":    "⬜ Lowercase letter",
-    "c-number":   "⬜ Number",
-    "c-special":  "⬜ Special character",
-    "c-norepeat": "⬜ No 3+ repeated characters",
-  };
-  for (const [id, pass] of Object.entries(checks)) {
-    const el = document.getElementById(id);
-    if (el) {
-      el.textContent = pass ? labels[id] : failLabels[id];
-      el.className = "criteria-item " + (pass ? "pass" : "fail");
+  for (var i = 0; i < results.length; i++) {
+    var el = document.getElementById("c" + (i + 1));
+    if (results[i]) {
+      el.textContent = "✓ " + labels[i];
+      el.className = "check-item pass";
+    } else {
+      el.textContent = labels[i];
+      el.className = "check-item";
     }
   }
 }
+
+// =============================================================================
+// UPDATE STRENGTH
+// This runs every time the user types a character.
+// It recalculates the score, updates the bar, label, bits, and checklist.
+// =============================================================================
 
 function updateStrength() {
-  const pw = passwordInput.value;
-  if (!pw) {
-    strengthText.textContent = "Password strength: —";
-    progressFill.style.width = "0%";
-    complexityEl.textContent = "Password complexity: —";
-    ttc1e3.textContent = "—"; ttc1e9.textContent = "—"; ttc1e12.textContent = "—";
-    updateCriteria("");
+  var pw = pwInput.value;
+
+  if (pw.length === 0) {
+    strengthLabel.textContent = "Strength: —";
+    bar.style.width = "0%";
+    bitsLabel.textContent = "Bits of entropy: —";
+    updateChecklist("");
     return;
   }
 
-  const bits = entropy(pw);
-  complexityEl.textContent = `Password complexity: ${bits.toFixed(2)} bits`;
+  var score = calcScore(pw);
+  var bits  = calcEntropy(pw);
 
-  // Exponential guesses (seconds)
-  const g1   = Math.pow(2, bits) / 1e3;
-  const g2   = Math.pow(2, bits) / 1e9;
-  const g3   = Math.pow(2, bits) / 1e12;
-  function setTtc(el, seconds) {
-    const text = formatTime(seconds);
-    el.textContent = text;
-    el.style.color = text === "🔒 Impossible" ? "var(--success)" : "var(--accent)";
-    el.style.fontSize = text === "🔒 Impossible" ? "12px" : "";
-  }
-  setTtc(ttc1e3,  g1);
-  setTtc(ttc1e9,  g2);
-  setTtc(ttc1e12, g3);
+  // Update bits label
+  bitsLabel.textContent = "Bits of entropy: " + bits.toFixed(1);
 
-  const score = getScore(pw);
-  const pct = (score / 7 * 100).toFixed(1);
-  progressFill.style.width = pct + "%";
+  // Update progress bar: score out of 7 criteria
+  bar.style.width = Math.round((score / 7) * 100) + "%";
 
+  // Pick a label and bar color based on the score
   if (score <= 2) {
-    strengthText.textContent = "Password strength: Weak ❌";
-    progressFill.style.background = "var(--danger)";
+    strengthLabel.textContent = "Strength: Weak";
+    bar.style.background = "#ef4444";
   } else if (score <= 4) {
-    strengthText.textContent = "Password strength: Fair ⚠️";
-    progressFill.style.background = "var(--warn)";
+    strengthLabel.textContent = "Strength: Fair";
+    bar.style.background = "#f59e0b";
   } else if (score <= 6) {
-    strengthText.textContent = "Password strength: Strong ✅";
-    progressFill.style.background = "var(--success)";
+    strengthLabel.textContent = "Strength: Strong";
+    bar.style.background = "#10b981";
   } else {
-    strengthText.textContent = "Password strength: Excellent 🏆";
-    progressFill.style.background = "linear-gradient(90deg, var(--accent), var(--accent2))";
+    strengthLabel.textContent = "Strength: Excellent";
+    bar.style.background = "#4f46e5";
   }
 
-  updateCriteria(pw);
+  updateChecklist(pw);
 }
 
-passwordInput.addEventListener("input", updateStrength);
+// Listen for input events — fires every time the user types or deletes a char
+pwInput.addEventListener("input", updateStrength);
 
-togglePassword.onchange = () => {
-  passwordInput.type = togglePassword.checked ? "text" : "password";
-};
-
-copyBtn.onclick = () => {
-  const pw = passwordInput.value;
-  if (!pw) { showToast("Nothing to copy!"); return; }
-  navigator.clipboard.writeText(pw).then(() => showToast("✅ Copied!"));
-};
-
-// ===== SAVE HISTORY =====
-function getStrengthLabel(pw) {
-  const s = getScore(pw);
-  if (s <= 2) return "weak";
-  if (s <= 5) return "medium";
-  return "strong";
-}
-
-function renderHistory() {
-  historyList.innerHTML = "";
-  if (!passwordHistory.length) {
-    historyList.innerHTML = '<p class="empty-history">No saved passwords yet. Hit 💾 Save in Password Mode!</p>';
-    return;
+// Toggle showing the password text
+showPw.addEventListener("change", function() {
+  if (showPw.checked) {
+    pwInput.type = "text";
+  } else {
+    pwInput.type = "password";
   }
-  [...passwordHistory].reverse().forEach((item, i) => {
-    const div = document.createElement("div");
-    div.className = "history-item";
-    const strengthClass = getStrengthLabel(item.pw);
-    div.innerHTML = `
-      <span class="history-pw">${item.pw.replace(/./g, c => c === ' ' ? '&nbsp;' : c)}</span>
-      <span class="history-strength ${strengthClass}">${strengthClass}</span>
-      <span class="history-time">${item.time}</span>
-      <button class="history-copy-btn" data-pw="${encodeURIComponent(item.pw)}">📋</button>
-    `;
-    historyList.appendChild(div);
-  });
-  historyList.querySelectorAll(".history-copy-btn").forEach(btn => {
-    btn.onclick = () => {
-      navigator.clipboard.writeText(decodeURIComponent(btn.dataset.pw))
-        .then(() => showToast("✅ Copied from history!"));
-    };
-  });
-}
-
-saveHistoryBtn.onclick = () => {
-  const pw = passwordInput.value;
-  if (!pw) { showToast("Type a password first!"); return; }
-  const now = new Date();
-  const time = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  passwordHistory.push({ pw, time });
-  if (passwordHistory.length > 20) passwordHistory.shift();
-  localStorage.setItem("pwHistory", JSON.stringify(passwordHistory));
-  renderHistory();
-  showToast("💾 Password saved!");
-};
-
-clearHistoryBtn.onclick = () => {
-  passwordHistory = [];
-  localStorage.removeItem("pwHistory");
-  renderHistory();
-  showToast("🗑️ History cleared");
-};
-
-// ===== GENERATOR =====
-openGeneratorBtn.onclick = () => {
-  generatorModal.classList.add("show");
-  generatedPreview.textContent = "—";
-  useGeneratedBtn.disabled = true;
-};
-generatorCancel.onclick = () => generatorModal.classList.remove("show");
-
-function generatePassword(len, numbers, specials) {
-  const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  const digits  = "0123456789";
-  const special  = "!@#$%^&*-_=+?";
-  let arr = [];
-  for (let i = 0; i < numbers; i++) arr.push(digits[Math.floor(Math.random() * digits.length)]);
-  for (let i = 0; i < specials; i++) arr.push(special[Math.floor(Math.random() * special.length)]);
-  while (arr.length < len) arr.push(letters[Math.floor(Math.random() * letters.length)]);
-  return arr.sort(() => Math.random() - 0.5).join("");
-}
-
-generateBtn.onclick = () => {
-  lastGeneratedPw = generatePassword(+lengthSlider.value, +numberSlider.value, +specialSlider.value);
-  generatedPreview.textContent = lastGeneratedPw;
-  useGeneratedBtn.disabled = false;
-};
-
-useGeneratedBtn.onclick = () => {
-  passwordInput.value = lastGeneratedPw;
-  updateStrength();
-  generatorModal.classList.remove("show");
-  showToast("✨ Password applied!");
-};
-
-lengthSlider.oninput = () => { lengthValue.textContent = lengthSlider.value; };
-numberSlider.oninput = () => { numberValue.textContent = numberSlider.value; };
-specialSlider.oninput = () => { specialValue.textContent = specialSlider.value; };
-
-// ===== DARK MODE =====
-function applyTheme(dark) {
-  document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
-  darkModeToggle.checked = dark;
-  localStorage.setItem("darkMode", dark);
-}
-darkModeToggle.onchange = () => { isDark = darkModeToggle.checked; applyTheme(isDark); };
-
-// ===== SETTINGS MODAL =====
-settingsBtn.onclick = () => {
-  renderHistory();
-  settingsModal.classList.add("show");
-};
-settingsClose.onclick = () => settingsModal.classList.remove("show");
-settingsModal.addEventListener("click", e => {
-  if (e.target === settingsModal) settingsModal.classList.remove("show");
 });
 
-// ===== BACKGROUND MUSIC (Web Audio API) =====
-function startMusic() {
-  if (audioCtx) return;
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  const vol = audioCtx.createGain();
-  vol.gain.value = +volumeSlider.value / 100 * 0.4;
-  vol.connect(audioCtx.destination);
-  musicNodes.push(vol);
+// =============================================================================
+// MODE SWITCHING
+// Switches between Password Mode and Gamified Mode.
+// Adds/removes the "hidden" class (display:none in CSS) and "active" on pills.
+// =============================================================================
 
-  // Gentle ambient lo-fi: layered sine oscillators + slight detune
-  const notes = [130.81, 164.81, 196.00, 220.00, 261.63, 196.00, 164.81, 220.00];
-  let noteIdx = 0;
+btnPassword.addEventListener("click", function() {
+  btnPassword.className = "pill active";
+  btnGame.className = "pill";
+  passwordMode.className = "card";
+  gameMode.className = "card hidden";
+});
 
-  function playNote() {
-    if (!audioCtx) return;
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain);
-    gain.connect(vol);
-    osc.type = "sine";
-    osc.frequency.value = notes[noteIdx % notes.length];
-    osc.detune.value = (Math.random() - 0.5) * 10;
-    gain.gain.setValueAtTime(0, audioCtx.currentTime);
-    gain.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.3);
-    gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 1.4);
-    osc.start(audioCtx.currentTime);
-    osc.stop(audioCtx.currentTime + 1.5);
-    noteIdx++;
+btnGame.addEventListener("click", function() {
+  btnGame.className = "pill active";
+  btnPassword.className = "pill";
+  gameMode.className = "card";
+  passwordMode.className = "card hidden";
+  if (!gameStarted) {
+    startGame();
   }
+});
 
-  playNote();
-  const interval = setInterval(() => {
-    if (!musicEnabled) { clearInterval(interval); return; }
-    playNote();
-  }, 900);
-  musicNodes.push({ stop: () => clearInterval(interval) });
-}
+// =============================================================================
+// GAMIFIED MODE - The Password Game
+// Inspired by The Password Game by Neal Agarwal (neal.fun/password-game)
+//
+// Rules are defined as objects inside an array.
+// Each rule has a title, a description, a hint, and a check function.
+// Rules unlock one at a time — a new rule only appears once all visible
+// rules are satisfied. This is done with a simple loop and a counter.
+// =============================================================================
 
-function stopMusic() {
-  if (audioCtx) { audioCtx.close(); audioCtx = null; }
-  musicNodes = [];
-}
+var gameStarted   = false;
+var allRules      = [];
+var visibleCount  = 0;  // how many rules are currently shown
 
-musicToggle.onchange = () => {
-  musicEnabled = musicToggle.checked;
-  musicControls.style.display = musicEnabled ? "flex" : "none";
-  musicVisualizer.classList.toggle("hidden", !musicEnabled);
-  if (musicEnabled) startMusic();
-  else stopMusic();
-};
+function buildRules() {
+  var today   = new Date();
+  var month   = today.toLocaleString("default", { month: "long" });
+  var day     = today.toLocaleString("default", { weekday: "long" });
+  var year    = String(today.getFullYear());
 
-volumeSlider.oninput = () => {
-  volumeValue.textContent = volumeSlider.value + "%";
-  if (audioCtx && musicNodes[0]) {
-    musicNodes[0].gain.value = +volumeSlider.value / 100 * 0.4;
-  }
-};
-
-// ===== MODE SWITCHING =====
-modePwBtn.onclick = () => {
-  modePwBtn.classList.add("active");
-  modeGameBtn.classList.remove("active");
-  passwordMode.classList.add("active");
-  gamifiedMode.classList.remove("active");
-};
-modeGameBtn.onclick = () => {
-  modeGameBtn.classList.add("active");
-  modePwBtn.classList.remove("active");
-  gamifiedMode.classList.add("active");
-  passwordMode.classList.remove("active");
-  if (!gameInitialized) initGame();
-};
-
-// ===== TIP OF THE DAY =====
-function loadTip() {
-  const tip = TIPS[Math.floor(Math.random() * TIPS.length)];
-  tipBox.textContent = tip;
-}
-
-// ===== GAMIFIED MODE =====
-let gameInitialized = false;
-let visibleRules = [];
-let totalRules = 0;
-
-// Rule definitions
-function buildRules(pw) {
-  const today = new Date();
-  const month = today.toLocaleString("default", { month: "long" });
-  const dayOfWeek = today.toLocaleString("default", { weekday: "long" });
-
-  const rules = [
+  // Each rule is an object with: title, desc, hint, check (a function)
+  return [
     {
-      id: 1,
-      desc: "Your password must be at least 5 characters.",
-      hint: "Just start typing!",
-      check: p => p.length >= 5,
+      title: "Length Check",
+      desc:  "Your password must be at least 5 characters.",
+      hint:  "Just start typing!",
+      check: function(p) { return p.length >= 5; }
     },
     {
-      id: 2,
-      desc: "Your password must include a number.",
-      hint: "Add any digit: 0-9",
-      check: p => /[0-9]/.test(p),
+      title: "Add a Number",
+      desc:  "Your password must include at least one number.",
+      hint:  "Add any digit: 0 through 9.",
+      check: function(p) { return /[0-9]/.test(p); }
     },
     {
-      id: 3,
-      desc: "Your password must include an uppercase letter.",
-      hint: "Hold Shift and type a letter.",
-      check: p => /[A-Z]/.test(p),
+      title: "Uppercase Letter",
+      desc:  "Your password must include an uppercase letter.",
+      hint:  "Hold Shift and press a letter.",
+      check: function(p) { return /[A-Z]/.test(p); }
     },
     {
-      id: 4,
-      desc: "Your password must include a special character (!@#$%^&*).",
-      hint: "Try ! or @ or #",
-      check: p => /[!@#$%^&*]/.test(p),
+      title: "Special Character",
+      desc:  "Your password must include a special character like ! @ # $ % ^ & *",
+      hint:  "Try adding an exclamation mark or hash symbol.",
+      check: function(p) { return /[!@#$%^&*]/.test(p); }
     },
     {
-      id: 5,
-      desc: "Your password must be at least 12 characters.",
-      hint: "Keep typing…",
-      check: p => p.length >= 12,
+      title: "12 Characters",
+      desc:  "Your password must be at least 12 characters long.",
+      hint:  "Keep typing until you reach 12 characters.",
+      check: function(p) { return p.length >= 12; }
     },
     {
-      id: 6,
-      desc: `Your password must include the current month: "${month}".`,
-      hint: `Type the word: ${month}`,
-      check: p => p.toLowerCase().includes(month.toLowerCase()),
+      title: "Current Month",
+      desc:  "Your password must contain the name of this month: " + month + ".",
+      hint:  "Type the word: " + month,
+      check: function(p) { return p.toLowerCase().indexOf(month.toLowerCase()) !== -1; }
     },
     {
-      id: 7,
-      desc: "The digits in your password must sum to at least 25.",
-      hint: "Add more numbers! e.g. 999 = 27",
-      check: p => {
-        const sum = [...p].filter(c => /\d/.test(c)).reduce((s, c) => s + +c, 0);
+      title: "Digit Sum",
+      desc:  "All the digits in your password must add up to at least 25.",
+      hint:  "Try adding 9 + 9 + 9 = 27.",
+      check: function(p) {
+        var sum = 0;
+        for (var i = 0; i < p.length; i++) {
+          if (p[i] >= "0" && p[i] <= "9") {
+            sum = sum + parseInt(p[i]);
+          }
+        }
         return sum >= 25;
-      },
+      }
     },
     {
-      id: 8,
-      desc: "Your password must contain a Roman numeral (I, V, X, L, C, D, M).",
-      hint: "Add I, V, X, L, C, D, or M",
-      check: p => /[IVXLCDM]/.test(p),
+      title: "Day of the Week",
+      desc:  "Your password must contain today's day: " + day + ".",
+      hint:  "Type the word: " + day,
+      check: function(p) { return p.toLowerCase().indexOf(day.toLowerCase()) !== -1; }
     },
     {
-      id: 9,
-      desc: "Your password must include an emoji. 🎉",
-      hint: "Copy-paste an emoji: 🔥 ✅ 🎯 💡",
-      check: p => /\p{Emoji_Presentation}/u.test(p),
+      title: "Current Year",
+      desc:  "Your password must include the current year: " + year + ".",
+      hint:  "Add the four digits: " + year,
+      check: function(p) { return p.indexOf(year) !== -1; }
     },
     {
-      id: 10,
-      desc: `Your password must contain the day of the week: "${dayOfWeek}".`,
-      hint: `Type: ${dayOfWeek}`,
-      check: p => p.toLowerCase().includes(dayOfWeek.toLowerCase()),
+      title: "No Triple Repeats",
+      desc:  "Your password must not have the same character three times in a row.",
+      hint:  "Avoid things like aaa or 111.",
+      check: function(p) { return !(/(.)\1\1/.test(p)); }
     },
     {
-      id: 11,
-      desc: "Your password must contain at least 3 unique special characters.",
-      hint: "Mix !@#$%^&*-_=+",
-      check: p => {
-        const specials = [...new Set([...p].filter(c => /[^A-Za-z0-9]/.test(c)))];
-        return specials.length >= 3;
-      },
+      title: "Contains 'secure'",
+      desc:  "Your password must contain the word: secure",
+      hint:  "Just type the word: secure",
+      check: function(p) { return p.toLowerCase().indexOf("secure") !== -1; }
     },
     {
-      id: 12,
-      desc: "Your password must be a palindrome OR contain the word 'secure'.",
-      hint: "Add 'secure' anywhere, or make it read the same backwards.",
-      check: p => {
-        const clean = p.replace(/\s/g, "").toLowerCase();
-        return clean.includes("secure") || clean === [...clean].reverse().join("");
-      },
-    },
-    {
-      id: 13,
-      desc: "Your password must include the current year.",
-      hint: `Add: ${today.getFullYear()}`,
-      check: p => p.includes(String(today.getFullYear())),
-    },
-    {
-      id: 14,
-      desc: "Your password must be at least 20 characters.",
-      hint: "Keep adding characters…",
-      check: p => p.length >= 20,
-    },
-    {
-      id: 15,
-      desc: "Your password must not contain 3 or more consecutive identical characters.",
-      hint: "Avoid 'aaa' or '111'",
-      check: p => !(/(.)\1\1/).test(p),
+      title: "20 Characters",
+      desc:  "Your password must be at least 20 characters long.",
+      hint:  "Keep adding characters until you hit 20.",
+      check: function(p) { return p.length >= 20; }
     },
   ];
-
-  return rules;
 }
 
-let allRules = [];
-
-function initGame() {
-  gameInitialized = true;
-  allRules = buildRules("");
-  totalRules = allRules.length;
-  visibleRules = [allRules[0]]; // show first rule
+function startGame() {
+  gameStarted  = true;
+  allRules     = buildRules();
+  visibleCount = 1;  // start by showing only the first rule
+  winBox.className = "win-box hidden";
+  rulesList.style.display = "flex";
   renderRules("");
-  winScreen.classList.add("hidden");
-  rulesContainer.style.display = "flex";
 }
 
+// Draws all currently visible rule cards and checks each one against the password.
 function renderRules(pw) {
-  rulesContainer.innerHTML = "";
-  let passCount = 0;
+  rulesList.innerHTML = "";
 
-  visibleRules.forEach((rule, i) => {
-    const pass = rule.check(pw);
-    if (pass) passCount++;
+  var passed = 0;
 
-    const card = document.createElement("div");
-    card.className = `rule-card ${pass ? "rule-pass" : (i === visibleRules.length - 1 ? "rule-pending" : "rule-fail")}`;
-    card.innerHTML = `
-      <div class="rule-header">
-        <div class="rule-number">${rule.id}</div>
-        <span>${getRuleTitle(rule.id)}</span>
-        <span class="rule-status">${pass ? "✅" : "❌"}</span>
-      </div>
-      <div class="rule-desc">${rule.desc}</div>
-      ${!pass ? `<div class="rule-hint">💡 ${rule.hint}</div>` : ""}
-    `;
-    rulesContainer.appendChild(card);
-  });
+  for (var i = 0; i < visibleCount; i++) {
+    var rule = allRules[i];
+    var ok   = rule.check(pw);
 
-  rulesPassed.textContent = passCount;
-  gameProgressFill.style.width = (passCount / totalRules * 100) + "%";
-  gameProgressFill.style.background = passCount === totalRules
-    ? "linear-gradient(90deg, var(--success), var(--accent))"
-    : passCount > totalRules * 0.6 ? "var(--success)"
-    : passCount > totalRules * 0.3 ? "var(--warn)"
-    : "var(--danger)";
+    if (ok) {
+      passed = passed + 1;
+    }
 
-  // Unlock next rule if all visible ones pass
-  const allCurrentPass = visibleRules.every(r => r.check(pw));
-  if (allCurrentPass && visibleRules.length < allRules.length) {
-    const nextRule = allRules[visibleRules.length];
-    visibleRules.push(nextRule);
-    renderRules(pw); // re-render with new rule
-    showToast(`🔓 New rule unlocked! (Rule ${nextRule.id})`);
+    // Decide the visual state of this rule card
+    var state;
+    if (ok) {
+      state = "pass";
+    } else if (i === visibleCount - 1) {
+      // The most recently unlocked rule is "new" (yellow) not "fail" (red)
+      // because the player just saw it and hasn't tried it yet
+      state = "new";
+    } else {
+      state = "fail";
+    }
+
+    // Build the rule card using createElement and textContent
+    var card = document.createElement("div");
+    card.className = "rule " + state;
+
+    var header = document.createElement("div");
+    header.className = "rule-header";
+
+    var num = document.createElement("div");
+    num.className = "rule-num";
+    num.textContent = i + 1;
+
+    var title = document.createElement("span");
+    title.textContent = rule.title;
+
+    var status = document.createElement("span");
+    status.className = "rule-status " + state;
+    if (state === "pass") status.textContent = "Pass";
+    if (state === "fail") status.textContent = "Fail";
+    if (state === "new")  status.textContent = "New";
+
+    header.appendChild(num);
+    header.appendChild(title);
+    header.appendChild(status);
+
+    var desc = document.createElement("div");
+    desc.className = "rule-desc";
+    desc.textContent = rule.desc;
+
+    card.appendChild(header);
+    card.appendChild(desc);
+
+    // Only show the hint when the rule is not yet satisfied
+    if (!ok) {
+      var hint = document.createElement("div");
+      hint.className = "rule-hint";
+      hint.textContent = "Hint: " + rule.hint;
+      card.appendChild(hint);
+    }
+
+    rulesList.appendChild(card);
   }
 
-  // WIN
-  if (passCount === totalRules && totalRules > 0) {
-    setTimeout(() => {
-      const preview = document.getElementById("winPasswordPreview");
-      if (preview) preview.textContent = pw || gamePasswordInput.value;
-      winScreen.classList.remove("hidden");
-      rulesContainer.style.display = "none";
-      showToast("🏆 You won the Password Game!", 4000);
-    }, 500);
+  // Update the counter and progress bar
+  gameCount.textContent = "Rules passed: " + passed + " / " + allRules.length;
+
+  var pct = Math.round((passed / allRules.length) * 100);
+  gameBar.style.width = pct + "%";
+
+  if (pct < 40) {
+    gameBar.style.background = "#ef4444";
+  } else if (pct < 70) {
+    gameBar.style.background = "#f59e0b";
+  } else {
+    gameBar.style.background = "#10b981";
+  }
+
+  // Check if every visible rule is passing — if so, unlock the next one
+  var allCurrentPass = true;
+  for (var j = 0; j < visibleCount; j++) {
+    if (!allRules[j].check(pw)) {
+      allCurrentPass = false;
+      break;
+    }
+  }
+
+  if (allCurrentPass && visibleCount < allRules.length) {
+    visibleCount = visibleCount + 1;
+    renderRules(pw);  // re-draw to show the new rule
+    return;
+  }
+
+  // Win condition: all rules are passing
+  if (passed === allRules.length && allRules.length > 0) {
+    winPw.textContent = pw;
+    winBox.className = "win-box";
+    rulesList.style.display = "none";
   }
 }
 
-function getRuleTitle(id) {
-  const titles = {
-    1: "Length Check", 2: "Must Have Number", 3: "Uppercase Required",
-    4: "Special Character", 5: "Longer Please", 6: "Time Awareness",
-    7: "Digit Sum", 8: "Roman Numerals", 9: "Emoji Time! 🎉",
-    10: "Day Awareness", 11: "Special Variety", 12: "Wordplay",
-    13: "Year of Reckoning", 14: "Going Long", 15: "No Triple Repeats",
-  };
-  return titles[id] || `Rule ${id}`;
-}
-
-gamePasswordInput.addEventListener("input", () => {
-  if (winScreen && !winScreen.classList.contains("hidden")) return;
-  renderRules(gamePasswordInput.value);
+gamePw.addEventListener("input", function() {
+  if (winBox.className === "win-box") return;
+  renderRules(gamePw.value);
 });
 
-restartGame.onclick = () => {
-  gamePasswordInput.value = "";
-  visibleRules = [allRules[0]];
-  winScreen.classList.add("hidden");
-  rulesContainer.style.display = "flex";
+restartBtn.addEventListener("click", function() {
+  gamePw.value = "";
+  visibleCount = 1;
+  winBox.className = "win-box hidden";
+  rulesList.style.display = "flex";
   renderRules("");
-  showToast("🔄 Game restarted!");
-};
-
-playAgainBtn.onclick = () => {
-  gamePasswordInput.value = "";
-  visibleRules = [allRules[0]];
-  winScreen.classList.add("hidden");
-  rulesContainer.style.display = "flex";
-  renderRules("");
-};
-
-const copyWinPasswordBtn = document.getElementById("copyWinPasswordBtn");
-if (copyWinPasswordBtn) {
-  copyWinPasswordBtn.onclick = () => {
-    const pw = gamePasswordInput.value;
-    if (!pw) { showToast("No password to copy!"); return; }
-    navigator.clipboard.writeText(pw).then(() => {
-      copyWinPasswordBtn.textContent = "✅ Copied!";
-      setTimeout(() => { copyWinPasswordBtn.textContent = "📋 Copy Password"; }, 2000);
-      showToast("✅ Winning password copied!");
-    });
-  };
-}
-
-// ===== MODAL CLICK-OUTSIDE =====
-generatorModal.addEventListener("click", e => {
-  if (e.target === generatorModal) generatorModal.classList.remove("show");
 });
 
-// ===== INIT =====
-applyTheme(isDark);
-loadTip();
+playAgain.addEventListener("click", function() {
+  gamePw.value = "";
+  visibleCount = 1;
+  winBox.className = "win-box hidden";
+  rulesList.style.display = "flex";
+  renderRules("");
+});
+
+// =============================================================================
+// INIT
+// Runs once when the page loads.
+// Picks a random tip and shows the initial (empty) strength check.
+// =============================================================================
+
+var randomIndex = Math.floor(Math.random() * tips.length);
+tip.textContent = tips[randomIndex];
+
 updateStrength();
-renderHistory();
-
-// ===== ATTACK INFO MODAL =====
-const ATTACK_INFO = {
-  online: {
-    icon: "🐢",
-    title: "Online Attack",
-    speed: "~1,000 guesses/sec",
-    desc: "An online attack is what happens when a hacker tries to log into a live website by guessing your password directly. The website's server slows them down — it has rate limits, lockouts after failed attempts, and CAPTCHAs. This is the slowest type of attack, making even moderately strong passwords very hard to crack this way.",
-    example: "Think of someone repeatedly trying passwords on a login page until they get locked out. Most sites block after 5–10 failed attempts."
-  },
-  offline: {
-    icon: "⚡",
-    title: "Offline Attack",
-    speed: "~1,000,000,000 guesses/sec",
-    desc: "An offline attack happens after a hacker steals a database of hashed passwords from a breached website. They no longer need to interact with any server — they can run guesses on their own hardware at full speed. A modern GPU can test billions of passwords per second. This is far more dangerous than online attacks.",
-    example: "When major sites like LinkedIn or RockYou were breached, attackers downloaded all the password hashes and cracked them at home using GPU rigs — no rate limiting, no lockouts."
-  },
-  cluster: {
-    icon: "🚀",
-    title: "Cluster Attack",
-    speed: "~1,000,000,000,000 guesses/sec",
-    desc: "A cluster attack uses dozens or hundreds of machines working together — like a cloud computing farm or a botnet — to crack passwords in parallel. Intelligence agencies, well-funded criminal groups, or large botnets can achieve this. At a trillion guesses per second, even long passwords can fall quickly if they follow predictable patterns.",
-    example: "Imagine 1,000 GPUs all running simultaneously, each testing different parts of the password space. Nation-state attackers and serious cybercriminal groups operate at this scale."
-  }
-};
-
-const attackModal  = document.getElementById("attack-modal");
-const attackIcon   = document.getElementById("attackModalIcon");
-const attackTitle  = document.getElementById("attackModalTitle");
-const attackSpeed  = document.getElementById("attackModalSpeed");
-const attackDesc   = document.getElementById("attackModalDesc");
-const attackExample= document.getElementById("attackModalExample");
-const attackClose  = document.getElementById("attackModalClose");
-
-function openAttackModal(type) {
-  const info = ATTACK_INFO[type];
-  attackIcon.textContent   = info.icon;
-  attackTitle.textContent  = info.title;
-  attackSpeed.textContent  = info.speed;
-  attackDesc.textContent   = info.desc;
-  attackExample.textContent= "💡 " + info.example;
-  attackModal.classList.add("show");
-}
-
-["online","offline","cluster"].forEach(type => {
-  const card = document.getElementById(`ttc-card-${type}`);
-  if (card) {
-    card.addEventListener("click", () => openAttackModal(type));
-    card.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") openAttackModal(type); });
-  }
-});
-
-attackClose.onclick = () => attackModal.classList.remove("show");
-attackModal.addEventListener("click", e => {
-  if (e.target === attackModal) attackModal.classList.remove("show");
-});
