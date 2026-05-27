@@ -1,10 +1,9 @@
 /*
- * script.js - Password Trainer
- * CS50x Final Project
- *
- * Author: [Your Name]
- * GitHub: [Your GitHub Username]
- * edX:    [Your edX Username]
+ * script.js - passtrainer
+ * HarvardX CS50x Final Project
+ * Author - Samuel Kuga 
+ * GitHub username - samk90210
+ * edX username -  sam_5638
  *
  * NOTE: The UI layout and styling of this project were built with assistance
  * from Claude (Anthropic) via claude.ai. The core logic was written and
