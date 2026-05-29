@@ -13,71 +13,137 @@
 
     <header>
       <div class="logo">PassTrainer</div>
+
       <div class="mode-row">
-        <button id="btnPassword" class="pill active">Password Mode</button>
-        <button id="btnGame"     class="pill">Gamified Mode</button>
+        <button id="btnPassword" class="b1 active">Password Mode</button>
+
+        <!-- changed pill -> b1 -->
+        <button id="btnGame" class="b1">Gamified Mode</button>
       </div>
     </header>
 
-    <!-- ======= PASSWORD MODE ======= -->
+    <!-- password mode -->
     <div id="passwordMode" class="card">
+
       <h1>Password Checker</h1>
 
       <div class="row">
         <input id="pwInput" type="password" placeholder="Type your password...">
-        <label><input id="showPw" type="checkbox"> Show</label>
+
+        <label>
+          <input id="showPw" type="checkbox">
+          Show
+        </label>
       </div>
 
-      <p id="strengthLabel" class="strength">Strength: —</p>
+      <p id="strengthLabel" class="strength">
+        Strength: —
+      </p>
 
-      <div class="bar-wrap">
+      <!-- changed bar-wrap -> barwrapper -->
+      <div class="barwrapper">
         <div id="bar"></div>
       </div>
 
-      <p id="bitsLabel" class="bits">Bits of entropy: —</p>
+      <!-- changed bits -> bit -->
+      <p id="bitsLabel" class="bit">
+        Entropy bits: —
+      </p>
 
       <div class="checklist">
-        <div id="c1" class="check-item">At least 8 characters</div>
-        <div id="c2" class="check-item">At least 12 characters</div>
-        <div id="c3" class="check-item">Uppercase letter (A-Z)</div>
-        <div id="c4" class="check-item">Lowercase letter (a-z)</div>
-        <div id="c5" class="check-item">A number (0-9)</div>
-        <div id="c6" class="check-item">A special character (!@#$...)</div>
-        <div id="c7" class="check-item">No 3 repeated chars in a row</div>
+
+        <div id="c1" class="checkitem">
+          At least 8 characters
+        </div>
+
+        <div id="c2" class="checkitem">
+          At least 12 characters
+        </div>
+
+        <div id="c3" class="checkitem">
+          Uppercase letter (A-Z)
+        </div>
+
+        <div id="c4" class="checkitem">
+          Lowercase letter (a-z)
+        </div>
+
+        <div id="c5" class="checkitem">
+          A number (0-9)
+        </div>
+
+        <div id="c6" class="checkitem">
+          A special character (!@#$...)
+        </div>
+
+        <div id="c7" class="checkitem">
+          No 3 repeated chars in a row
+        </div>
+
       </div>
 
-      <div class="tip-box" id="tip"></div>
+    
+      <div class="tips" id="tip"></div>
+
     </div>
 
-    <!-- ======= GAMIFIED MODE ======= -->
+    <!-- gamified mode -->
     <div id="gameMode" class="card hidden">
+
       <h1>The Password Game</h1>
+
       <p class="credit">
-        Inspired by <a href="https://neal.fun/password-game/" target="_blank">The Password Game</a> by Neal Agarwal
+        Inspired by
+        <a href="https://neal.fun/password-game/" target="_blank">
+          The Password Game
+        </a>
+        by Neal Agarwal  - neal.fun
       </p>
 
       <div class="row">
-        <input id="gamePw" type="text" placeholder="Start typing your password...">
-        <button id="restartBtn">Restart</button>
+
+        <input
+          id="gamePw"
+          type="text"
+          placeholder="Start typing your password..."
+        >
+
+        <button id="restartBtn">
+          Restart
+        </button>
+
       </div>
 
-      <div class="bar-wrap">
+      <div class="barwrapper">
         <div id="gameBar"></div>
       </div>
-      <p id="gameCount" class="bits">Rules passed: 0 / 0</p>
+
+      <!-- changed bits -> bit -->
+      <p id="gameCount" class="bit">
+        Rules passed: 0 / 0
+      </p>
 
       <div id="rulesList"></div>
+      
+      <div id="winBox" class="winner hidden">
 
-      <div id="winBox" class="win-box hidden">
         <h2>You Win!</h2>
-        <p>You passed all the rules!</p>
+
+        <p> You completed all the rules and prerequisites of the rules! Congratulation!s</p>
+
         <p class="win-pw" id="winPw"></p>
-        <button id="playAgain">Play Again</button>
+
+        <button id="playAgain">
+          Play Again
+        </button>
+
       </div>
+
     </div>
 
   </div>
 
   <script src="script.js"></script>
+
 </body>
 </html>
