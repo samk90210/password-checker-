@@ -32,7 +32,7 @@ header {
   color: #4f46e5;
 }
 
-/* button shape rounded corners so I used the name pills */
+/* round buttom */
 .mode-row {
   display: flex;
   gap: 6px;
@@ -41,7 +41,7 @@ header {
   padding: 4px;
 }
 
-.pill {
+.b1 {
   padding: 8px 18px;
   border-radius: 999px;
   border: none;
@@ -53,7 +53,7 @@ header {
   font-family: inherit;
 }
 
-.pill.active {
+.b1.active {
   background: #4f46e5;
   color: white;
 }
@@ -80,7 +80,7 @@ header {
 .row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 15px;
   margin-bottom: 14px;
   flex-wrap: wrap;
 }
@@ -132,7 +132,7 @@ button:hover { background: #f0f0f0; }
   margin-bottom: 8px;
 }
 
-.bits {
+.bit {
   font-size: 12px;
   color: #888;
   font-family: monospace;
@@ -140,8 +140,8 @@ button:hover { background: #f0f0f0; }
   margin-bottom: 16px;
 }
 
-/* progress bar in strength of password */
-.bar-wrap {
+/*wrapper class for progress bar in strength of password */
+.barwrapper {
   height: 10px;
   background: #eee;
   border-radius: 999px;
@@ -156,7 +156,7 @@ button:hover { background: #f0f0f0; }
   transition: width 0.4s, background 0.4s;
 }
 
-/* checklist that's going to be in strength of password as well */
+/*checklist that's going to be in strength of password as well */
 .checklist {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -164,7 +164,7 @@ button:hover { background: #f0f0f0; }
   margin: 16px 0;
 }
 
-.check-item {
+.checkitem {
   font-size: 13px;
   padding: 8px 10px;
   border-radius: 8px;
@@ -173,7 +173,7 @@ button:hover { background: #f0f0f0; }
   color: #999;
 }
 
-.check-item.pass {
+.checkitem.pass {
   background: #f0fdf4;
   border-color: #10b981;
   color: #10b981;
@@ -181,7 +181,7 @@ button:hover { background: #f0f0f0; }
 }
 
 /* tip box  */
-.tip-box {
+.tips {
   background: #eef2ff;
   border: 1.5px solid #c7d2fe;
   border-radius: 10px;
@@ -191,12 +191,12 @@ button:hover { background: #f0f0f0; }
   line-height: 1.6;
 }
 
-.tip-box::before {
+.tips::before {
   content: "Tip: ";
   font-weight: 700;
 }
 
-/* credit to neal.fun for the password game inspo */
+/*credit to neal.fun for the password game inspo */
 .credit {
   font-size: 12px;
   color: #aaa;
@@ -224,22 +224,22 @@ button:hover { background: #f0f0f0; }
   background: #f8f9ff;
 }
 
-.rule.pass {
+.rulepass {
   border-color: #10b981;
   background: #f0fdf4;
 }
 
-.rule.fail {
+.rulefail {
   border-color: #ef4444;
   background: #fff5f5;
 }
 
-.rule.new {
+.rulenew {
   border-color: #f59e0b;
   background: #fffbeb;
 }
 
-.rule-header {
+.ruleheader {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -248,7 +248,7 @@ button:hover { background: #f0f0f0; }
   margin-bottom: 4px;
 }
 
-.rule-num {
+.rulenum {
   width: 26px;
   height: 26px;
   background: #4f46e5;
@@ -262,21 +262,21 @@ button:hover { background: #f0f0f0; }
   flex-shrink: 0;
 }
 
-.rule-status {
+.rulestat {
   margin-left: auto;
   font-size: 13px;
   font-weight: 700;
 }
 
-.rule-status.pass    { color: #10b981; }
-.rule-status.fail    { color: #ef4444; }
-.rule-status.new     { color: #f59e0b; }
+.rulestat.pass    { color: #10b981; }
+.rulestat.fail    { color: #ef4444; }
+.rulestat.new     { color: #f59e0b; }
 
-.rule-desc { font-size: 13px; color: #555; line-height: 1.5; }
-.rule-hint { font-size: 12px; color: #4f46e5; margin-top: 4px; font-style: italic; }
+.ruledesc { font-size: 13px; color: #555; line-height: 1.5; }
+.rulehint { font-size: 12px; color: #4f46e5; margin-top: 4px; font-style: italic; }
 
 /* win alert */
-.win-box {
+.winner {
   text-align: center;
   padding: 30px 16px;
   margin-top: 16px;
@@ -285,8 +285,8 @@ button:hover { background: #f0f0f0; }
   border-radius: 12px;
 }
 
-.win-box h2 { font-size: 26px; margin-bottom: 8px; }
-.win-box p  { color: #555; margin-bottom: 8px; }
+.winner h2 { font-size: 26px; margin-bottom: 8px; }
+.winner p  { color: #555; margin-bottom: 8px; }
 
 .win-pw {
   font-family: monospace;
@@ -301,5 +301,5 @@ button:hover { background: #f0f0f0; }
   .checklist { grid-template-columns: 1fr; }
   header { flex-direction: column; align-items: flex-start; }
   .mode-row { width: 100%; }
-  .pill { flex: 1; text-align: center; }
+  .b1 { flex: 1; text-align: center; }
 }
