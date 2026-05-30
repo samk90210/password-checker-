@@ -1,5 +1,5 @@
 /*
- * script.js - passtrainer
+ * project - passtrainer
  * HarvardX CS50x Final Project
  * Author - Samuel Kuga 
  * GitHub username - samk90210
