@@ -5,7 +5,7 @@
  * GitHub username - samk90210
  * edX username -  sam_5638
  *
- * Note: I was helped by Claude's anthropedic AI to integrate Neal. Fun's game, the Password game, mechanics into my code. Also, I was assisted by AI in rounding up the UI design and helping me with the color palette for my passtrainer app. 
+ * Note: I was helped by Claude's anthropedic AI to integrate Neal. Fun's game, the Password game, mechanics into my code. Also, I was assisted by AI in rounding up the UI design and helping me with the color palette for my passtrainer app.
  */
 
 // variable initialization
@@ -110,10 +110,10 @@ function updateChecklist(pw) {
     var el = document.getElementById("c" + (i + 1));
     if (results[i]) {
       el.textContent = "✓ " + labes[i];
-      el.className = "check-item pass";
+      el.className = "checkitem pass";
     } else {
       el.textContent = labes[i];
-      el.className = "check-item";
+      el.className = "checkitem";
     }
   }
 }
@@ -180,15 +180,15 @@ showPw.addEventListener("change", function() {
 // Adds/removes the "hidden" class (display: none in CSS) and "active" on pills.
 
 btnPassword.addEventListener("click", function() {
-  btnPassword.className = "pill active";
-  btnGame.className = "pill";
+  btnPassword.className = "b1 active";
+  btnGame.className = "b1";
   passwordMode.className = "card";
   gameMode.className = "card hidden";
 });
 
 btnGame.addEventListener("click", function() {
-  btnGame.className = "pill active";
-  btnPassword.className = "pill";
+  btnGame.className = "b1 active";
+  btnPassword.className = "b1";
   gameMode.className = "card";
   passwordMode.className = "card hidden";
   if (!gameStart) {
@@ -303,7 +303,7 @@ function startGame() {
   gameStart  = true;
   allRules     = buildRules();
   visCount = 1;  
-  winBox.className = "win-box hidden";
+  winBox.className = "winner hidden";
   rulesList.style.display = "flex";
   renderRules("");
 }
@@ -337,17 +337,17 @@ function renderRules(pw) {
     card.className = "rule " + state;
 
     var header = document.createElement("div");
-    header.className = "rule-header";
+    header.className = "ruleheader";
 
     var num = document.createElement("div");
-    num.className = "rule-num";
+    num.className = "rulenum";
     num.textContent = i + 1;
 
     var title = document.createElement("span");
     title.textContent = rule.title;
 
     var status = document.createElement("span");
-    status.className = "rule-status " + state;
+    status.className = "rulestat " + state;
     if (state === "pass") status.textContent = "Pass";
     if (state === "fail") status.textContent = "Fail";
     if (state === "new")  status.textContent = "New";
@@ -357,7 +357,7 @@ function renderRules(pw) {
     header.appendChild(status);
 
     var desc = document.createElement("div");
-    desc.className = "rule-desc";
+    desc.className = "ruledesc";
     desc.textContent = rule.desc;
 
     card.appendChild(header);
@@ -366,7 +366,7 @@ function renderRules(pw) {
     //Prerequisite for showing the hint is when rule conditions are not satisfied,
     if (!ok) {
       var hint = document.createElement("div");
-      hint.className = "rule-hint";
+      hint.className = "rulehint";
       hint.textContent = "Hint: " + rule.hint;
       card.appendChild(hint);
     }
@@ -399,7 +399,7 @@ function renderRules(pw) {
 
   if (allCurrPass && visCount < allRules.length) {
     visCount = visCount + 1;
-    renderRules(pw);  // re-draw to show the new rule
+    renderRules(pw); 
     return;
   }
 
@@ -407,20 +407,20 @@ function renderRules(pw) {
   // Win prerequisite - all rules are true / passing. 
   if (passed === allRules.length && allRules.length > 0) {
     winPw.textContent = pw;
-    winBox.className = "win-box";
+    winBox.className = "winner";
     rulesList.style.display = "none";
   }
 }
 
 gamePw.addEventListener("input", function() {
-  if (winBox.className === "win-box") return;
+  if (winBox.className === "winner") return;
   renderRules(gamePw.value);
 });
 
 restartBtn.addEventListener("click", function() {
   gamePw.value = "";
   visCount = 1;
-  winBox.className = "win-box hidden";
+  winBox.className = "winner hidden";
   rulesList.style.display = "flex";
   renderRules("");
 });
@@ -428,7 +428,7 @@ restartBtn.addEventListener("click", function() {
 playAgain.addEventListener("click", function() {
   gamePw.value = "";
   visCount = 1;
-  winBox.className = "win-box hidden";
+  winBox.className = "winner hidden";
   rulesList.style.display = "flex";
   renderRules("");
 });
