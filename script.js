@@ -9,8 +9,6 @@
  */
 
 // variable initialization
-// the document.getElementById finds the HTML element by its id attribute. 
-// After we get the HTML element, we store into a var to be able to use it later. 
 
 var pwInput       = document.getElementById("pwInput");
 var showPw        = document.getElementById("showPw");
@@ -34,8 +32,6 @@ var winPw         = document.getElementById("winPw");
 var playAgain     = document.getElementById("playAgain");
 
 // tip array
-//An array can store multiple values in the same variable name. 
-// From the array, we pick one random to load it into the tip box in the app. 
 
 
 var tips = [
@@ -47,12 +43,7 @@ var tips = [
 ];
 
 // Entropy calculation
-// What is entropy? Entropy enables us to tell how hard a password it to crack and it is alsways measured in bits. 
-// The formula for entropy calculation is bits = length x log2(pool size)
-// pool size is the total number of possible characters that we/hacker can choose from
-// For example, when it's only lowercase letters, the pool is 26. 
-//             adding it with digits makes it 36 because there are 10 numbers possible to choose from. 
-// The more bits, the longer it takes the hacker to guess the password. 
+// formula for entropy calculation is bits = length x log2(pool size)
 
 
 function calculateEntropy(pw) {
@@ -82,8 +73,6 @@ function calculateScore(pw) {
 }
 
 // Updating the checklist 
-// Have a loop that loops through each criteria point and makes it green if it passes and makes it grey if it fails the criteria. 
-
 
 function updateChecklist(pw) {
   var results = [
@@ -119,10 +108,6 @@ function updateChecklist(pw) {
 }
 
 // update strength 
-// This runs every time the user types a character.
-// the update strength runs in real time as the user types in a character/input. 
-// it instantaneously recalculates the password strength, updates the strength bar, label, bits/entropy, and checklist criteria. 
-
 
 function updateStrength() {
   var pw = pwInput.value;
@@ -175,9 +160,6 @@ showPw.addEventListener("change", function() {
 });
 
 // Switching game modes 
-// Switches between Password Mode and Gamified Mode.
-// Just switches between the password and gamified mode. 
-// Adds/removes the "hidden" class (display: none in CSS) and "active" on pills.
 
 btnPassword.addEventListener("click", function() {
   btnPassword.className = "b1 active";
@@ -197,11 +179,6 @@ btnGame.addEventListener("click", function() {
 });
 
 //gamified mode - the password game from Neal.fun
-// The rules are objects that are inside the array. 
-// Each rule has a description, title, and a check function, which checks if it meets the requirements for the game rule. 
-// A special rule unlocks once at a time a new rule is visible. Once all rules and their prerequisites have been completed, this is achieved using a loop and 
-
- 
 
 var gameStart   = false;
 var allRules      = [];
@@ -213,7 +190,6 @@ function buildRules() {
   var day     = today.toLocaleString("default", { weekday: "long" });
   var year    = String(today.getFullYear());
 
-  // each rule is an object that is inside the rule object, which includes the title, desc, hint, and check, which is a function that can be called 
   return [
     {
       title: "Length Check",
@@ -298,7 +274,6 @@ function buildRules() {
   ];
 }
 
-//start by showing 1 rule not 0 before starting 
 function startGame() {
   gameStart  = true;
   allRules     = buildRules();
@@ -326,13 +301,11 @@ function renderRules(pw) {
     if (ok) {
       state = "pass";
     } else if (i === visCount - 1) {
-      //Due to the player recently seeing it and not having tried the new rule for now, it is "new" and not "fail."
       state = "new"
     } else {
       state = "fail";
     }
     
-    // Using createElement and textContent, we can create the rule card
     var card = document.createElement("div");
     card.className = "rule " + state;
 
@@ -363,7 +336,6 @@ function renderRules(pw) {
     card.appendChild(header);
     card.appendChild(desc);
 
-    //Prerequisite for showing the hint is when rule conditions are not satisfied,
     if (!ok) {
       var hint = document.createElement("div");
       hint.className = "rulehint";
@@ -373,8 +345,7 @@ function renderRules(pw) {
 
     rulesList.appendChild(card);
   }
-
-  //updating the progress and counter bar
+  
   gameCount.textContent = "Rules passed: " + passed + " / " + allRules.length;
 
   var pct = Math.round((passed / allRules.length) * 100);
@@ -388,7 +359,6 @@ function renderRules(pw) {
     gameBar.style.background = "#10b981";
   }
 
-  // allCurrPass checks if every rule that is visible to the user is true, and if so, moves on to the next
   var allCurrPass = true;
   for (var j = 0; j < visCount; j++) {
     if (!allRules[j].check(pw)) {
@@ -403,8 +373,6 @@ function renderRules(pw) {
     return;
   }
 
-
-  // Win prerequisite - all rules are true / passing. 
   if (passed === allRules.length && allRules.length > 0) {
     winPw.textContent = pw;
     winBox.className = "winner";
@@ -432,11 +400,6 @@ playAgain.addEventListener("click", function() {
   rulesList.style.display = "flex";
   renderRules("");
 });
-
-// init
-//init runs once the page loads in the web
-//takes a random tip from the array and shows the empty strength check because its empty still
-
 
 var randomIndex = Math.floor(Math.random() * tips.length);
 tip.textContent = tips[randomIndex];
