@@ -1,4 +1,4 @@
-/* base/outline of the app */
+/* base */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
@@ -32,7 +32,7 @@ header {
   color: #4f46e5;
 }
 
-/* round buttom */
+/* buttons/b1 */
 .mode-row {
   display: flex;
   gap: 6px;
@@ -110,7 +110,7 @@ label {
   gap: 5px;
 }
 
-/* buttons */
+/* buttons / b1 */
 button {
   padding: 9px 16px;
   border-radius: 10px;
@@ -124,13 +124,14 @@ button {
 
 button:hover { background: #f0f0f0; }
 
-/* strength of password */
+/* strength */
 .strength {
   font-size: 16px;
   font-weight: 700;
   margin-bottom: 8px;
 }
 
+/* bits */
 .bit {
   font-size: 12px;
   color: #888;
@@ -139,7 +140,7 @@ button:hover { background: #f0f0f0; }
   margin-bottom: 16px;
 }
 
-/* wrapper class for progress bar */
+/* progress bar */
 .barwrapper {
   height: 10px;
   background: #eee;
@@ -179,7 +180,7 @@ button:hover { background: #f0f0f0; }
   font-weight: 600;
 }
 
-/* tips*/
+/* tips */
 .tips {
   background: #eef2ff;
   border: 1.5px solid #c7d2fe;
@@ -195,7 +196,7 @@ button:hover { background: #f0f0f0; }
   font-weight: 700;
 }
 
-/* credit to neal.fun for inspo */
+/* credit to neal.fun for the inspo */
 .credit {
   font-size: 12px;
   color: #aaa;
@@ -209,7 +210,7 @@ button:hover { background: #f0f0f0; }
 /* game counter */
 #gameCount { margin-bottom: 16px; }
 
-/* list that contains rules */
+/* rules list */
 #rulesList {
   display: flex;
   flex-direction: column;
@@ -240,7 +241,7 @@ button:hover { background: #f0f0f0; }
 }
 
 
-.rule-header {
+.ruleheader {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -249,7 +250,8 @@ button:hover { background: #f0f0f0; }
   margin-bottom: 4px;
 }
 
-.rule-num {
+/* JS sets className="rulenum" */
+.rulenum {
   min-width: 58px;
   height: 26px;
   padding: 0 8px;
@@ -265,11 +267,12 @@ button:hover { background: #f0f0f0; }
 }
 
 
-.rule-num::before {
+.rulenum::before {
   content: "Rule ";
 }
 
-.rule-status {
+
+.rulestat {
   margin-left: auto;
   padding-left: 14px;
   font-size: 13px;
@@ -278,15 +281,25 @@ button:hover { background: #f0f0f0; }
   flex-shrink: 0;
 }
 
-.rule-status.pass { color: #10b981; }
-.rule-status.fail { color: #ef4444; }
-.rule-status.new  { color: #f59e0b; }
+.rulestat.pass { color: #10b981; }
+.rulestat.fail { color: #ef4444; }
+.rulestat.new  { color: #f59e0b; }
 
-/* rule */
-.rule-desc { font-size: 13px; color: #555; line-height: 1.5; }
-.rule-hint { font-size: 12px; color: #4f46e5; margin-top: 4px; font-style: italic; }
 
-/* winner */
+.ruledesc {
+  font-size: 13px;
+  color: #555;
+  line-height: 1.5;
+}
+
+
+.rulehint {
+  font-size: 12px;
+  color: #4f46e5;
+  margin-top: 4px;
+  font-style: italic;
+}
+
 .winner {
   text-align: center;
   padding: 30px 16px;
@@ -295,6 +308,8 @@ button:hover { background: #f0f0f0; }
   border: 2px solid #10b981;
   border-radius: 12px;
 }
+
+.winner.hidden { display: none; }
 
 .winner h2 { font-size: 26px; margin-bottom: 8px; }
 .winner p  { color: #555; margin-bottom: 8px; }
