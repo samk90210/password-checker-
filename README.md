@@ -22,6 +22,8 @@ The first section is the Password Mode card where its the password mode page and
 tags. To switch between the the two sections we add and remove the hidden CSS class, then it sets the display to off. In the header section of the file it connects to style.css and loads the script.js 
 file before the ending tag. Adding this was important because without this it makes sure that all the HTML elements exsists before JavsScript uses getElementById to find the element. I made a crucial 
 mistake not adding this so that Javascript tried getting a HTML element that didnt exsist which caused a error. 
+
+
 <img width="477" height="478" alt="Screenshot 2026-05-20 at 6 22 09 p m" src="https://github.com/user-attachments/assets/3d39e273-47aa-44ca-af9d-341c12a754c3" />
 
 
@@ -33,10 +35,14 @@ use so using AI i traversed through the multitude of color variations possible, 
 general favorite was the purple scheme which is became the final color scheme. I separated the file itno base, header, b1 which is botton 1, card, password input, progress bar, checklist grid, and rule 
 cards. I had trouble changing through the 3 stages that the rule cards have which is green, red, and yellow. Using the same method for index.html i used the hidden class, display to none to change the 
 color without moving and changing any of the elements on the page.
+
+
 <img width="706" height="633" alt="Screenshot 2026-05-23 at 8 17 21 p m" src="https://github.com/user-attachments/assets/adc21b87-f17b-46de-a634-790da1e7c042" />
 
 
 This is purple scheme were every thing is visible and appealing to the eye 
+
+
 <img width="483" height="602" alt="Screenshot 2026-05-23 at 8 16 53 p m" src="https://github.com/user-attachments/assets/ccaf479b-00de-40e0-b722-c2eba8c592d0" />
 
 
