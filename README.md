@@ -52,9 +52,9 @@ colorful and something that isnt dark. So, after a lot contemplating I choose th
 ## script.js 
 In one sentence the script.js is all the application logic where it controls all the functions of the app and without doubt is hardest part to write in the entire project. I had trouble writing the 
 entropy calculation. I wanted to add entropy to my app because I though it was a cool idea of being able to know how many bits of entropy can be in a password. There was one problem, I didnt know how 
-to calculate entropy which I found out which is bits = length x log2(pool size). I figured that pool size is the number of possible characters that can go into one letter of the password. I didnt know 
-that entropy could be calculated and that how the bits grow exponentially. Another part of the code which I contemplated is the renderRules function where it I either show every rule at once or make my 
-self a challenge by showing the next rule after all the requirements are met in the input that the user makes. I like my self a challenge so I decided to challenge so I used the createElement and 
-appendChild and then check if all the rules are passing. If they are show a new rule. As well a problem that i had is when switching between the password and gamfied mode everytime I switch back to the 
-gamified mode the gamfied mode reset and made it tough for the user because he they had to retype the password everytime. However, this issue was fixed using the gameStart which is boolean which stays 
-true if the user made a input in the gamified mode which ultimately avoids the game resseting everytime the user switches modes. 
+to calculate entropy which I found out which is bits = length x log2(pool size). I figured out that pool size is the number of possible characters that can go into one letter of the password. I didnt 
+know that entropy could be calculated and that how the bits grow exponentially. Another part of the code which I contemplated is the renderRules function where it I either show every rule at once or 
+make my self a challenge by showing the next rule after all the requirements are met in the input that the user makes. I like my self a challenge so I decided to challenge so I used the createElement 
+and appendChild and then check if all the rules are passing. If they are show a new rule. As well a problem that i had is when switching between the password and gamfied mode everytime I switch back to 
+the gamified mode the gamfied mode reset and made it tough for the user because he they had to retype the password everytime. However, this issue was fixed using the gameStart which is boolean which 
+stays true if the user made a input in the gamified mode which ultimately avoids the game resseting everytime the user switches modes. 
